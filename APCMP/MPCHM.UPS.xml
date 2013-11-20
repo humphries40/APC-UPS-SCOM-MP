@@ -1,0 +1,2053 @@
+﻿<?xml version="1.0" encoding="utf-8"?><ManagementPack ContentReadable="true" SchemaVersion="2.0" OriginalSchemaVersion="2.0" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
+  <Manifest>
+    <Identity>
+      <ID>MPCHM.UPS</ID>
+    <Version>1.0.0.14</Version>
+    </Identity>
+    <Name>CHM - UPS</Name>
+    <References>
+      <Reference Alias="AppLog">
+        <ID>System.ApplicationLog.Library</ID>
+        <Version>7.0.8432.0</Version>
+        <PublicKeyToken>31bf3856ad364e35</PublicKeyToken>
+      </Reference>
+      <Reference Alias="SCDW">
+        <ID>Microsoft.SystemCenter.DataWarehouse.Library</ID>
+        <Version>7.0.8432.0</Version>
+        <PublicKeyToken>31bf3856ad364e35</PublicKeyToken>
+      </Reference>
+      <Reference Alias="SNMP">
+        <ID>System.Snmp.Library</ID>
+        <Version>7.0.8432.0</Version>
+        <PublicKeyToken>31bf3856ad364e35</PublicKeyToken>
+      </Reference>
+      <Reference Alias="NetworkLibrary">
+        <ID>System.NetworkManagement.Library</ID>
+        <Version>7.0.9538.0</Version>
+        <PublicKeyToken>31bf3856ad364e35</PublicKeyToken>
+      </Reference>
+      <Reference Alias="Windows">
+        <ID>Microsoft.Windows.Library</ID>
+        <Version>7.5.8501.0</Version>
+        <PublicKeyToken>31bf3856ad364e35</PublicKeyToken>
+      </Reference>
+      <Reference Alias="NetworkMonitoring">
+        <ID>System.NetworkManagement.Monitoring</ID>
+        <Version>7.0.9538.0</Version>
+        <PublicKeyToken>31bf3856ad364e35</PublicKeyToken>
+      </Reference>
+      <Reference Alias="InstanceGroup">
+        <ID>Microsoft.SystemCenter.InstanceGroup.Library</ID>
+        <Version>7.5.8501.0</Version>
+        <PublicKeyToken>31bf3856ad364e35</PublicKeyToken>
+      </Reference>
+      <Reference Alias="System">
+        <ID>System.Library</ID>
+        <Version>7.5.8501.0</Version>
+        <PublicKeyToken>31bf3856ad364e35</PublicKeyToken>
+      </Reference>
+      <Reference Alias="SC">
+        <ID>Microsoft.SystemCenter.Library</ID>
+        <Version>7.0.8432.0</Version>
+        <PublicKeyToken>31bf3856ad364e35</PublicKeyToken>
+      </Reference>
+      <Reference Alias="Health">
+        <ID>System.Health.Library</ID>
+        <Version>7.0.8432.0</Version>
+        <PublicKeyToken>31bf3856ad364e35</PublicKeyToken>
+      </Reference>
+    </References>
+  </Manifest>
+  <TypeDefinitions>
+    <EntityTypes>
+      <ClassTypes>
+        <ClassType ID="MPCHM.UPS.APC" Accessibility="Public" Abstract="false" Base="NetworkLibrary!System.NetworkManagement.Node" Hosted="false" Singleton="false" Extension="false">
+          <Property ID="CalibrationDate" Type="string" AutoIncrement="false" Key="false" CaseSensitive="false" MaxLength="256" MinLength="0" Required="false" Scale="0" />
+        </ClassType>
+		<ClassType ID="MPCHM.UPS.APC.ExtTempProbe" Accessibility="Public" Abstract="false" Base="MPCHM.UPS.APC" Hosted="false" Singleton="false" Extension="false" />
+      </ClassTypes>
+    </EntityTypes>
+    <ModuleTypes>
+	  <DataSourceModuleType ID="MPCHM.UPS.DataSource.APC.ParsedSnmpTraps" Accessibility="Public" Batching="false">
+			<Configuration>
+				<IncludeSchemaTypes>
+					<SchemaType>System!System.ParamListSchema</SchemaType>
+				</IncludeSchemaTypes>
+			<xsd:element minOccurs="1" maxOccurs="1" name="IP" type="xsd:string" xmlns:xsd="http://www.w3.org/2001/XMLSchema" />
+			<xsd:element minOccurs="0" maxOccurs="1" name="Version" type="xsd:string" xmlns:xsd="http://www.w3.org/2001/XMLSchema" />
+			<xsd:element minOccurs="0" maxOccurs="1" name="OIDProps" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+			  <xsd:complexType>
+				<xsd:sequence>
+				  <xsd:element minOccurs="0" maxOccurs="unbounded" name="OIDProp" type="xsd:string" />
+				</xsd:sequence>
+			  </xsd:complexType>
+			</xsd:element>
+			<xsd:element name="EventOriginId" type="xsd:string" xmlns:xsd="http://www.w3.org/2001/XMLSchema" />
+			<xsd:element name="PublisherId" type="xsd:string" xmlns:xsd="http://www.w3.org/2001/XMLSchema" />
+			<xsd:element name="PublisherName" type="xsd:string" xmlns:xsd="http://www.w3.org/2001/XMLSchema" />
+			<xsd:element name="Channel" type="xsd:string" xmlns:xsd="http://www.w3.org/2001/XMLSchema" />
+			<xsd:element name="LoggingComputer" type="xsd:string" xmlns:xsd="http://www.w3.org/2001/XMLSchema" />
+			<xsd:element name="EventNumber" type="xsd:string" xmlns:xsd="http://www.w3.org/2001/XMLSchema" />
+			<xsd:element name="EventCategory" type="xsd:string" xmlns:xsd="http://www.w3.org/2001/XMLSchema" />
+			<xsd:element name="EventLevel" type="xsd:string" xmlns:xsd="http://www.w3.org/2001/XMLSchema" />
+			<xsd:element name="UserName" type="xsd:string" xmlns:xsd="http://www.w3.org/2001/XMLSchema" />
+			<xsd:element name="Description" type="xsd:string" minOccurs="0" maxOccurs="1" xmlns:xsd="http://www.w3.org/2001/XMLSchema" />
+			<xsd:element name="Params" type="ParamListType" xmlns:xsd="http://www.w3.org/2001/XMLSchema" />
+		  </Configuration>
+		  <ModuleImplementation Isolation="Any">
+			<Composite>
+			  <MemberModules>
+				<DataSource ID="DSTrap" TypeID="NetworkLibrary!System.NetworkManagement.SnmpTrapProvider">
+					<IP>$Config/IP$</IP>
+					<CommunityString>$RunAs[Name="NetworkLibrary!System.NetworkManagement.Snmp.MonitoringAccount"]/CommunityString$</CommunityString>
+					<Version>$Config/Version$</Version>
+					<OIDProps>$Config/OIDProps$</OIDProps>
+				</DataSource>
+				<ProbeAction ID="ParseScript" TypeID="Windows!Microsoft.Windows.PowerShellPropertyBagProbe">
+					<ScriptName>parse.ps1</ScriptName>
+					<ScriptBody><![CDATA[
+						param([System.string]$OIDofTrap
+					 	,[System.string]$Description
+						,[System.string]$Source
+						,[System.string]$ErrorCode
+						,[System.string]$Name
+						,[System.string]$Location
+						,[System.string]$Model
+						,[System.string]$Contact
+						)
+
+						$rootdir = $env:systemroot
+						$logDirectory = $rootdir + "\Logs\OpsMgrLogs\SNMPTraps"
+						$csvPath = $logDirectory + "\traps.csv"
+						
+						if($OIDofTrap.startsWith(".")){
+							$OIDofTrap = $OIDofTrap.substring(1)}
+							
+						$msg = $null	
+						$msg = "Source: """ + $Source + """ `t """ + "Priority: """ + $ErrorCode + """ `t """ + "Description: """ + $Description + """`t""" + "EventOID :" + $OIDofTrap + """ `t Version 1"
+						
+						if(!(Test-Path -Path $logDirectory)){
+							New-Item -ItemType directory -Path $logDirectory
+						}
+						
+						$outfile = $logDirectory +"\trapData.txt"
+						$msg | Add-Content $outfile
+						
+						$oidinfo = $null
+						$oidinfo = Import-Csv $csvPath| Where-Object {$_.OID -eq $OIDofTrap} 
+
+						
+						$descript = $null
+						$title = $null
+						$severity = $null
+						$descript = $oidinfo.Description
+						$title = $oidinfo.Name
+						$severity = $oidinfo.Severity
+						
+						$level = $null
+						$level = 4
+						
+						if($severity.ToLower().Contains("Severe".ToLower()))
+							{
+								$level = 1
+							}
+						if($severity.ToLower().Contains("Warning".ToLower()))
+							{
+								$level = 2
+							}
+						if($severity.ToLower().Contains("Informational".ToLower()))
+							{
+								$level = 4
+							}
+						
+						[int32]::TryParse($level , [ref]$level )
+						
+						$parsedDesc = $null
+						$parsedDesc = "Originial Description = " +'"' + $Description + '"' + "`n Parsed Trap Name= "+ '"' +  $title + '"' + "`n Parsed Description = " + '"' + $descript + '"' + "`n UPS Name = " + '"' + $Name + '"' + "`n Location = " + '"' + $Location + '"' + "`n UPS Model = " + '"' + $Model + '"' + "`n Contact = " + '"' + $Contact + '"';
+
+						$parsedDesc | Add-Content $outfile
+						
+						$api = New-Object -comObject 'MOM.ScriptAPI' 
+						$bag = $api.CreatePropertyBag() 
+						$bag.AddValue("Source", $Source)
+						$bag.AddValue("Priority", $ErrorCode)
+						$bag.AddValue("Description", $parsedDesc)
+						$bag.AddValue("EventID", $OIDofTrap)
+						$bag.AddValue("EventLevel", $level)
+						$bag
+						
+						]]>
+					</ScriptBody>
+					<Parameters>
+					 <Parameter>
+							 <Name>OIDofTrap</Name>
+									<Value>$Data/SnmpVarBinds/SnmpVarBind[2]/Value$</Value>
+					 </Parameter>
+					 <Parameter>
+							 <Name>Description</Name>
+									<Value>$Data/SnmpVarBinds/SnmpVarBind[3]/Value$</Value>
+					 </Parameter>
+					 <Parameter>
+							 <Name>Source</Name>
+									<Value>$Data/Source$</Value>
+					 </Parameter>
+					 <Parameter>
+							 <Name>ErrorCode</Name>
+									<Value>$Data/ErrorCode$</Value>
+					 </Parameter>
+					 <Parameter>
+							 <Name>Location</Name>
+									<Value>$Target/Property[Type="NetworkLibrary!System.NetworkManagement.Node"]/Location$</Value>
+					 </Parameter>
+					 <Parameter>
+							 <Name>Name</Name>
+									<Value>$Target/Property[Type="NetworkLibrary!System.NetworkManagement.Node"]/sysName$</Value>
+					 </Parameter>
+					<Parameter>
+							 <Name>Model</Name>
+									<Value>$Target/Property[Type="NetworkLibrary!System.NetworkManagement.Node"]/Model$</Value>
+					 </Parameter>
+					 <Parameter>
+							 <Name>Contact</Name>
+									<Value>$Target/Property[Type="NetworkLibrary!System.NetworkManagement.Node"]/PrimaryOwnerContact$</Value>
+					 </Parameter>
+					</Parameters>
+					<TimeoutSeconds>90</TimeoutSeconds>
+				</ProbeAction>
+				<ConditionDetection ID="Mapper" TypeID="System!System.Event.GenericDataMapper">
+				  <EventOriginId>$Target/Id$</EventOriginId>
+				  <PublisherId>$MPElement$</PublisherId>
+				  <PublisherName>$MPElement[Name="MPCHM.UPS.APC.Rule.ParsedSnmpTraps"]$</PublisherName>
+				  <Channel>SNMP Event</Channel>
+				  <LoggingComputer>$Data/Property[@Name='Source']$</LoggingComputer>
+				  <EventNumber>4</EventNumber>
+				  <EventCategory>4</EventCategory>
+				  <EventLevel>$Data/Property[@Name='EventLevel']$</EventLevel>
+				  <UserName />
+				  <Description>$Data/Property[@Name='Description']$</Description>
+				  <Params />
+				</ConditionDetection>
+			  </MemberModules>
+			  <Composition>
+				<Node ID="Mapper">
+				  <Node ID="ParseScript">
+					<Node ID="DSTrap" />
+				  </Node>
+				</Node>
+			  </Composition>
+			</Composite>
+		  </ModuleImplementation>
+		  <OutputType>System!System.Event.Data</OutputType>
+		</DataSourceModuleType>
+      <DataSourceModuleType ID="MPCHM.UPS.DiscoveryDS.APC" Accessibility="Internal" Batching="false">
+        <Configuration>
+          <xsd:element minOccurs="1" name="IntervalSeconds" type="xsd:integer" xmlns:xsd="http://www.w3.org/2001/XMLSchema" />
+          <xsd:element minOccurs="0" name="SyncTime" type="xsd:string" xmlns:xsd="http://www.w3.org/2001/XMLSchema" />
+          <xsd:element minOccurs="1" name="DeviceKey" type="xsd:string" xmlns:xsd="http://www.w3.org/2001/XMLSchema" />
+          <xsd:element minOccurs="1" name="IPAddress" type="xsd:string" xmlns:xsd="http://www.w3.org/2001/XMLSchema" />
+          <xsd:element minOccurs="1" name="Community" type="xsd:string" xmlns:xsd="http://www.w3.org/2001/XMLSchema" />
+          <xsd:element minOccurs="1" name="Version" type="xsd:string" xmlns:xsd="http://www.w3.org/2001/XMLSchema" />
+          <xsd:element minOccurs="1" name="ObjectID" type="xsd:string" xmlns:xsd="http://www.w3.org/2001/XMLSchema" />
+          <xsd:element minOccurs="1" name="Model" type="xsd:string" xmlns:xsd="http://www.w3.org/2001/XMLSchema" />
+        </Configuration>
+        <OverrideableParameters>
+          <OverrideableParameter ID="IntervalSeconds" Selector="$Config/IntervalSeconds$" ParameterType="int" />
+          <OverrideableParameter ID="SyncTime" Selector="$Config/SyncTime$" ParameterType="string" />
+        </OverrideableParameters>
+        <ModuleImplementation Isolation="Any">
+          <Composite>
+            <MemberModules>
+              <DataSource ID="Scheduler" TypeID="System!System.Discovery.Scheduler">
+                <Scheduler>
+                  <SimpleReccuringSchedule>
+                    <Interval>$Config/IntervalSeconds$</Interval>
+                    <SyncTime>$Config/SyncTime$</SyncTime>
+                  </SimpleReccuringSchedule>
+                  <ExcludeDates />
+                </Scheduler>
+              </DataSource>
+              <ProbeAction ID="Probe" TypeID="NetworkLibrary!System.NetworkManagement.SnmpProbe">
+                <IsWriteAction>false</IsWriteAction>
+                <IP>$Config/IPAddress$</IP>
+                <CommunityString>$Config/Community$</CommunityString>
+				<Version>$Config/Version$</Version>
+                <SnmpVarBinds>
+                  <SnmpVarBind>
+                    <OID>.1.3.6.1.2.1.1.2.0</OID>
+                    <Syntax>0</Syntax>
+                    <Value VariantType="8" />
+                  </SnmpVarBind>
+				  <SnmpVarBind>
+                    <OID>.1.3.6.1.4.1.318.1.1.1.1.1.1.0</OID>
+                    <Syntax>0</Syntax>
+                    <Value VariantType="8" />
+                  </SnmpVarBind>
+				  <SnmpVarBind>
+                    <OID>.1.3.6.1.4.1.318.1.1.1.7.2.7.0</OID>
+                    <Syntax>0</Syntax>
+                    <Value VariantType="8" />
+                  </SnmpVarBind>
+                </SnmpVarBinds>
+              </ProbeAction>
+              <ConditionDetection ID="FilterOnObjectID" TypeID="System!System.ExpressionFilter">
+                <Expression>
+                  <RegExExpression>
+                    <ValueExpression>
+                      <XPathQuery Type="String">SnmpVarBinds/SnmpVarBind[OID=".1.3.6.1.2.1.1.2.0"]/Value</XPathQuery>
+                    </ValueExpression>
+                    <Operator>ContainsSubstring</Operator>
+                    <Pattern>$Config/ObjectID$</Pattern>
+                  </RegExExpression>
+                </Expression>
+              </ConditionDetection>
+              <ConditionDetection ID="MapToDiscovery" TypeID="System!System.Discovery.ClassSnapshotDataMapper">
+                <ClassId>$MPElement[Name='MPCHM.UPS.APC']$</ClassId>
+                <InstanceSettings>
+                  <Settings>
+                    <Setting>
+                      <Name>$MPElement[Name='NetworkLibrary!System.NetworkManagement.Node']/DeviceKey$</Name>
+                      <Value>$Config/DeviceKey$</Value>
+                    </Setting>
+                    <Setting>
+                      <Name>$MPElement[Name='NetworkLibrary!System.NetworkManagement.Node']/Model$</Name>
+                      <Value>$Data/SnmpVarBinds/SnmpVarBind[OID=".1.3.6.1.4.1.318.1.1.1.1.1.1.0"]/Value$</Value>
+                    </Setting>
+					<Setting>
+                      <Name>$MPElement[Name="MPCHM.UPS.APC"]/CalibrationDate$</Name>
+                      <Value>$Data/SnmpVarBinds/SnmpVarBind[OID=".1.3.6.1.4.1.318.1.1.1.7.2.7.0"]/Value$</Value>
+                    </Setting>
+                  </Settings>
+                </InstanceSettings>
+              </ConditionDetection>
+            </MemberModules>
+            <Composition>
+              <Node ID="MapToDiscovery">
+                <Node ID="FilterOnObjectID">
+                  <Node ID="Probe">
+                    <Node ID="Scheduler" />
+                  </Node>
+                </Node>
+              </Node>
+            </Composition>
+          </Composite>
+        </ModuleImplementation>
+        <OutputType>System!System.Discovery.Data</OutputType>
+     </DataSourceModuleType>
+	  <DataSourceModuleType ID="MPCHM.UPS.DiscoveryDS.APC.ExtTempProbe" Accessibility="Internal" Batching="false">
+        <Configuration>
+          <xsd:element minOccurs="1" name="IntervalSeconds" type="xsd:integer" xmlns:xsd="http://www.w3.org/2001/XMLSchema" />
+          <xsd:element minOccurs="0" name="SyncTime" type="xsd:string" xmlns:xsd="http://www.w3.org/2001/XMLSchema" />
+          <xsd:element minOccurs="1" name="DeviceKey" type="xsd:string" xmlns:xsd="http://www.w3.org/2001/XMLSchema" />
+          <xsd:element minOccurs="1" name="IPAddress" type="xsd:string" xmlns:xsd="http://www.w3.org/2001/XMLSchema" />
+          <xsd:element minOccurs="1" name="Community" type="xsd:string" xmlns:xsd="http://www.w3.org/2001/XMLSchema" />
+          <xsd:element minOccurs="1" name="Version" type="xsd:string" xmlns:xsd="http://www.w3.org/2001/XMLSchema" />
+          <xsd:element minOccurs="1" name="ObjectID" type="xsd:string" xmlns:xsd="http://www.w3.org/2001/XMLSchema" />
+          <xsd:element minOccurs="1" name="Model" type="xsd:string" xmlns:xsd="http://www.w3.org/2001/XMLSchema" />
+        </Configuration>
+        <OverrideableParameters>
+          <OverrideableParameter ID="IntervalSeconds" Selector="$Config/IntervalSeconds$" ParameterType="int" />
+          <OverrideableParameter ID="SyncTime" Selector="$Config/SyncTime$" ParameterType="string" />
+        </OverrideableParameters>
+        <ModuleImplementation Isolation="Any">
+          <Composite>
+            <MemberModules>
+              <DataSource ID="Scheduler" TypeID="System!System.Discovery.Scheduler">
+                <Scheduler>
+                  <SimpleReccuringSchedule>
+                    <Interval>$Config/IntervalSeconds$</Interval>
+                    <SyncTime>$Config/SyncTime$</SyncTime>
+                  </SimpleReccuringSchedule>
+                  <ExcludeDates />
+                </Scheduler>
+              </DataSource>
+              <ProbeAction ID="Probe" TypeID="NetworkLibrary!System.NetworkManagement.SnmpProbe">
+                <IsWriteAction>false</IsWriteAction>
+                <IP>$Config/IPAddress$</IP>
+                <CommunityString>$Config/Community$</CommunityString>
+				<Version>$Config/Version$</Version>
+                <SnmpVarBinds>
+                  <SnmpVarBind>
+                    <OID>.1.3.6.1.4.1.318.1.1.10.2.3.1.0</OID>
+                    <Syntax>0</Syntax>
+                    <Value VariantType="8" />
+                  </SnmpVarBind>
+				  <SnmpVarBind>
+                    <OID>.1.3.6.1.4.1.318.1.1.1.1.1.1.0</OID>
+                    <Syntax>0</Syntax>
+                    <Value VariantType="8" />
+                  </SnmpVarBind>
+                </SnmpVarBinds>
+              </ProbeAction>
+              <ConditionDetection ID="FilterOnObjectID" TypeID="System!System.ExpressionFilter">
+                <Expression>
+                  <RegExExpression>
+                    <ValueExpression>
+                      <XPathQuery Type="String">SnmpVarBinds/SnmpVarBind[OID=".1.3.6.1.4.1.318.1.1.10.2.3.1.0"]/Value</XPathQuery>
+                    </ValueExpression>
+                    <Operator>MatchesWildcard</Operator>
+                    <Pattern>#</Pattern>
+                  </RegExExpression>
+                </Expression>
+              </ConditionDetection>
+              <ConditionDetection ID="MapToDiscovery" TypeID="System!System.Discovery.ClassSnapshotDataMapper">
+                <ClassId>$MPElement[Name='MPCHM.UPS.APC.ExtTempProbe']$</ClassId>
+                <InstanceSettings>
+                  <Settings>
+                    <Setting>
+                      <Name>$MPElement[Name='NetworkLibrary!System.NetworkManagement.Node']/DeviceKey$</Name>
+                      <Value>$Config/DeviceKey$</Value>
+                    </Setting>
+                    <Setting>
+                      <Name>$MPElement[Name='NetworkLibrary!System.NetworkManagement.Node']/Model$</Name>
+                      <Value>$Data/SnmpVarBinds/SnmpVarBind[OID=".1.3.6.1.4.1.318.1.1.1.1.1.1.0"]/Value$</Value>
+                    </Setting>
+                  </Settings>
+                </InstanceSettings>
+              </ConditionDetection>
+            </MemberModules>
+            <Composition>
+              <Node ID="MapToDiscovery">
+                <Node ID="FilterOnObjectID">
+                  <Node ID="Probe">
+                    <Node ID="Scheduler" />
+                  </Node>
+                </Node>
+              </Node>
+            </Composition>
+          </Composite>
+        </ModuleImplementation>
+        <OutputType>System!System.Discovery.Data</OutputType>
+      </DataSourceModuleType>	  
+    </ModuleTypes>
+  </TypeDefinitions>
+  <Monitoring>
+    <Discoveries>
+      <Discovery ID="MPCHM.UPS.Discovery.APC" Enabled="true" Target="NetworkLibrary!System.NetworkManagement.Node" ConfirmDelivery="false" Remotable="true" Priority="Normal">
+        <Category>Discovery</Category>
+        <DiscoveryTypes>
+          <DiscoveryClass TypeID="MPCHM.UPS.APC" />
+        </DiscoveryTypes>
+        <DataSource ID="DS" TypeID="MPCHM.UPS.DiscoveryDS.APC">
+          <IntervalSeconds>1000</IntervalSeconds>
+          <DeviceKey>$Target/Property[Type="NetworkLibrary!System.NetworkManagement.Node"]/DeviceKey$</DeviceKey>
+          <IPAddress>$Target/Property[Type="NetworkLibrary!System.NetworkManagement.Node"]/SNMPAddress$</IPAddress>
+          <Community>$RunAs[Name="NetworkLibrary!System.NetworkManagement.Snmp.MonitoringAccount"]/CommunityString$</Community>
+          <Version>$Target/Property[Type="NetworkLibrary!System.NetworkManagement.Node"]/SNMPVersion$</Version>
+          <ObjectID>.1.3.6.1.4.1.318.1.3</ObjectID>
+          <Model>$Target/Property[Type="NetworkLibrary!System.NetworkManagement.Node"]/Model$</Model>
+        </DataSource>
+		</Discovery>
+	  <Discovery ID="MPCHM.UPS.Discovery.APC.ExtTempProbe" Enabled="true" Target="MPCHM.UPS.APC" ConfirmDelivery="false" Remotable="true" Priority="Normal">
+        <Category>Discovery</Category>
+        <DiscoveryTypes>
+          <DiscoveryClass TypeID="MPCHM.UPS.APC.ExtTempProbe" />
+        </DiscoveryTypes>
+        <DataSource ID="DS" TypeID="MPCHM.UPS.DiscoveryDS.APC.ExtTempProbe">
+          <IntervalSeconds>1000</IntervalSeconds>
+          <DeviceKey>$Target/Property[Type="NetworkLibrary!System.NetworkManagement.Node"]/DeviceKey$</DeviceKey>
+          <IPAddress>$Target/Property[Type="NetworkLibrary!System.NetworkManagement.Node"]/SNMPAddress$</IPAddress>
+          <Community>$RunAs[Name="NetworkLibrary!System.NetworkManagement.Snmp.MonitoringAccount"]/CommunityString$</Community>
+          <Version>$Target/Property[Type="NetworkLibrary!System.NetworkManagement.Node"]/SNMPVersion$</Version>
+		  <ObjectID>.1.3.6.1.4.1.318.1.3</ObjectID>
+          <Model>$Target/Property[Type="NetworkLibrary!System.NetworkManagement.Node"]/Model$</Model>
+        </DataSource>
+      </Discovery>
+    </Discoveries>
+    <Rules>
+	  <Rule ID="MPCHM.UPS.APC.Rule.ParsedSnmpTraps" Enabled="true" Target="MPCHM.UPS.APC" ConfirmDelivery="false" Remotable="true" Priority="Normal" DiscardLevel="100">
+        <Category>EventCollection</Category>
+        <DataSources>
+          <DataSource ID="DS" TypeID="MPCHM.UPS.DataSource.APC.ParsedSnmpTraps">
+            <IP>$Target/Property[Type="NetworkLibrary!System.NetworkManagement.Node"]/SNMPAddress$</IP>
+			<Version>1</Version>
+            <OIDProps />
+			<EventOriginId>$Target/Id$</EventOriginId>
+            <PublisherId>$Target/Id$</PublisherId>
+            <PublisherName>SNMPEvent</PublisherName>
+            <Channel>SnmpEvent</Channel>
+            <LoggingComputer />
+            <EventNumber/>
+            <EventCategory></EventCategory>
+            <EventLevel></EventLevel>
+            <UserName />
+            <Params />
+          </DataSource>
+        </DataSources>
+        <WriteActions>
+          <WriteAction ID="WriteToDB" TypeID="SC!Microsoft.SystemCenter.CollectEvent" />
+          <WriteAction ID="WriteToDW" TypeID="SCDW!Microsoft.SystemCenter.DataWarehouse.PublishEventData" />
+        </WriteActions>
+      </Rule>
+      <Rule ID="MPCHM.UPS.APC.Rule.BatteryState" Enabled="true" Target="MPCHM.UPS.APC" ConfirmDelivery="false" Remotable="true" Priority="Normal" DiscardLevel="100">
+        <Category>PerformanceCollection</Category>
+        <DataSources>
+          <DataSource ID="DS" TypeID="Windows!Microsoft.Windows.TimedScript.PerformanceProvider">
+            <IntervalSeconds>300</IntervalSeconds>
+            <SyncTime />
+            <ScriptName>upsBatState.vbs</ScriptName>
+            <Arguments>$Target/Property[Type="NetworkLibrary!System.NetworkManagement.Node"]/SNMPAddress$ $RunAs[Name="NetworkLibrary!System.NetworkManagement.Snmp.MonitoringAccount"]/CommunityString$ $Target/Property[Type="NetworkLibrary!System.NetworkManagement.Node"]/SNMPVersion$</Arguments>
+            <ScriptBody>Dim oAPI, oBag
+Set oAPI = CreateObject("MOM.ScriptAPI")
+On Error Resume Next
+err.clear
+Dim oArgs
+Set oArgs = WScript.Arguments
+strDeviceIP = oArgs(0)
+strCommunity = oArgs(1)
+strVersion = oArgs(2)
+set objSNMP = CreateObject("OlePrn.OleSNMP")
+objSNMP.Open strDeviceIP, strCommunity, strVersion, 1000
+intValue = Int(objSNMP.Get(".1.3.6.1.4.1.318.1.1.1.2.1.2.0"))
+if err.number = 0 then
+     'Using current time on battery because there 
+     'isn't an OID for on battery, it only sends a trap when it switches
+     'So this checks to see that current time on battery is greater than 0 seconds
+   if intValue &gt; 0 then
+      intValue = 1
+   end if
+else
+	wscript.quit 0
+end if
+' Return the values to SCOM
+Set oBag = oAPI.CreatePropertyBag()
+Call oBag.AddValue("DeviceIP", strDeviceIP)
+Call oBag.AddValue("PerfValue", intValue )
+Call oAPI.Return(oBag)
+		</ScriptBody>
+            <TimeoutSeconds>60</TimeoutSeconds>
+            <ObjectName>$Target/Property[Type="NetworkLibrary!System.NetworkManagement.Node"]/sysName$</ObjectName>
+            <CounterName>Battery State (1 = On)</CounterName>
+            <InstanceName>$Target/Property[Type="NetworkLibrary!System.NetworkManagement.Node"]/Location$</InstanceName>
+            <Value>$Data/Property[@Name='PerfValue']$</Value>
+          </DataSource>
+        </DataSources>
+        <WriteActions>
+          <WriteAction ID="WriteToDB" TypeID="SC!Microsoft.SystemCenter.CollectPerformanceData" />
+          <WriteAction ID="WriteToDW" TypeID="SCDW!Microsoft.SystemCenter.DataWarehouse.PublishPerformanceData" />
+        </WriteActions>
+      </Rule>
+      <Rule ID="MPCHM.UPS.APC.ExtTempProbe.Rule.ExtTempF" Enabled="true" Target="MPCHM.UPS.APC.ExtTempProbe" ConfirmDelivery="false" Remotable="true" Priority="Normal" DiscardLevel="100">
+        <Category>PerformanceCollection</Category>
+        <DataSources>
+          <DataSource ID="DS" TypeID="Windows!Microsoft.Windows.TimedScript.PerformanceProvider">
+            <IntervalSeconds>300</IntervalSeconds>
+            <SyncTime />
+            <ScriptName>upsExtTempF.vbs</ScriptName>
+            <Arguments>$Target/Property[Type="NetworkLibrary!System.NetworkManagement.Node"]/SNMPAddress$ $RunAs[Name="NetworkLibrary!System.NetworkManagement.Snmp.MonitoringAccount"]/CommunityString$ $Target/Property[Type="NetworkLibrary!System.NetworkManagement.Node"]/SNMPVersion$</Arguments>
+            <ScriptBody>Dim oAPI, oBag
+Set oAPI = CreateObject("MOM.ScriptAPI")
+On Error Resume Next
+err.clear
+Dim oArgs
+Set oArgs = WScript.Arguments
+strDeviceIP = oArgs(0)
+strCommunity = oArgs(1)
+strVersion = oArgs(2)
+set objSNMP = CreateObject("OlePrn.OleSNMP")
+objSNMP.Open strDeviceIP, strCommunity, strVersion, 1000
+intTempScale  = objSNMP.Get(".1.3.6.1.4.1.318.1.1.10.2.3.2.1.5.1")
+intValue = Int(objSNMP.Get(".1.3.6.1.4.1.318.1.1.10.2.3.2.1.4.1"))
+if err.number = 0 then
+	if intTempScale = 1 then
+	    '1 = Celsius, 0 = Fahrenheit
+		intValue = Int(intValue * 9/5) + 32
+	else 
+		'Already in Fahrenheit
+	end if
+else
+	wscript.quit 0
+end if
+' Return the values to SCOM
+Set oBag = oAPI.CreatePropertyBag()
+Call oBag.AddValue("DeviceIP", strDeviceIP)
+Call oBag.AddValue("PerfValue", intValue )
+Call oAPI.Return(oBag)	</ScriptBody>
+            <TimeoutSeconds>60</TimeoutSeconds>
+            <ObjectName>$Target/Property[Type="NetworkLibrary!System.NetworkManagement.Node"]/sysName$</ObjectName>
+            <CounterName>External Temperature (Fahrenheit)</CounterName>
+            <InstanceName>$Target/Property[Type="NetworkLibrary!System.NetworkManagement.Node"]/Location$</InstanceName>
+            <Value>$Data/Property[@Name='PerfValue']$</Value>
+          </DataSource>
+        </DataSources>
+        <WriteActions>
+          <WriteAction ID="WriteToDB" TypeID="SC!Microsoft.SystemCenter.CollectPerformanceData" />
+          <WriteAction ID="WriteToDW" TypeID="SCDW!Microsoft.SystemCenter.DataWarehouse.PublishPerformanceData" />
+        </WriteActions>
+      </Rule>
+	  <Rule ID="MPCHM.UPS.APC.Rule.IntTempF" Enabled="true" Target="MPCHM.UPS.APC" ConfirmDelivery="false" Remotable="true" Priority="Normal" DiscardLevel="100">
+        <Category>PerformanceCollection</Category>
+        <DataSources>
+          <DataSource ID="DS" TypeID="Windows!Microsoft.Windows.TimedScript.PerformanceProvider">
+            <IntervalSeconds>300</IntervalSeconds>
+            <SyncTime />
+            <ScriptName>upsIntTempF.vbs</ScriptName>
+            <Arguments>$Target/Property[Type="NetworkLibrary!System.NetworkManagement.Node"]/SNMPAddress$ $RunAs[Name="NetworkLibrary!System.NetworkManagement.Snmp.MonitoringAccount"]/CommunityString$ $Target/Property[Type="NetworkLibrary!System.NetworkManagement.Node"]/SNMPVersion$</Arguments>
+            <ScriptBody>Dim oAPI, oBag
+Set oAPI = CreateObject("MOM.ScriptAPI")
+On Error Resume Next
+err.clear
+Dim oArgs
+Set oArgs = WScript.Arguments
+strDeviceIP = oArgs(0)
+strCommunity = oArgs(1)
+strVersion = oArgs(2)
+set objSNMP = CreateObject("OlePrn.OleSNMP")
+objSNMP.Open strDeviceIP, strCommunity, strVersion, 1000
+decValue = Int(objSNMP.Get(".1.3.6.1.4.1.318.1.1.1.2.3.2.0"))
+if err.number = 0 then
+	decValue = decValue / 10
+	decValue = decValue * (9/5) + 32
+  ' Already in fahrenheit
+else
+	wscript.quit 0
+end if
+' Return the values to SCOM
+Set oBag = oAPI.CreatePropertyBag()
+Call oBag.AddValue("DeviceIP", strDeviceIP)
+Call oBag.AddValue("PerfValue", decValue )
+Call oAPI.Return(oBag)	</ScriptBody>
+            <TimeoutSeconds>60</TimeoutSeconds>
+            <ObjectName>$Target/Property[Type="NetworkLibrary!System.NetworkManagement.Node"]/sysName$</ObjectName>
+            <CounterName>Internal Temperature (Fahrenheit)</CounterName>
+            <InstanceName>$Target/Property[Type="NetworkLibrary!System.NetworkManagement.Node"]/Location$</InstanceName>
+            <Value>$Data/Property[@Name='PerfValue']$</Value>
+          </DataSource>
+        </DataSources>
+        <WriteActions>
+          <WriteAction ID="WriteToDB" TypeID="SC!Microsoft.SystemCenter.CollectPerformanceData" />
+          <WriteAction ID="WriteToDW" TypeID="SCDW!Microsoft.SystemCenter.DataWarehouse.PublishPerformanceData" />
+        </WriteActions>
+      </Rule>
+      <Rule ID="MPCHM.UPS.APC.Rule.LoadPerc" Enabled="true" Target="MPCHM.UPS.APC" ConfirmDelivery="false" Remotable="true" Priority="Normal" DiscardLevel="100">
+        <Category>PerformanceCollection</Category>
+        <DataSources>
+          <DataSource ID="DS" TypeID="Windows!Microsoft.Windows.TimedScript.PerformanceProvider">
+            <IntervalSeconds>300</IntervalSeconds>
+            <SyncTime />
+            <ScriptName>upsLoadPerc.vbs</ScriptName>
+            <Arguments>$Target/Property[Type="NetworkLibrary!System.NetworkManagement.Node"]/SNMPAddress$ $RunAs[Name="NetworkLibrary!System.NetworkManagement.Snmp.MonitoringAccount"]/CommunityString$ $Target/Property[Type="NetworkLibrary!System.NetworkManagement.Node"]/SNMPVersion$</Arguments>
+            <ScriptBody>Dim oAPI, oBag
+Set oAPI = CreateObject("MOM.ScriptAPI")
+On Error Resume Next
+err.clear
+Dim oArgs
+Set oArgs = WScript.Arguments
+strDeviceIP = oArgs(0)
+strCommunity = oArgs(1)
+strVersion = oArgs(2)
+set objSNMP = CreateObject("OlePrn.OleSNMP")
+objSNMP.Open strDeviceIP, strCommunity, strVersion, 1000
+decValue = Int(objSNMP.Get(".1.3.6.1.4.1.318.1.1.1.4.3.3.0"))
+if err.number = 0 then
+   ' Divide by ten to get correct value
+   decValue = decValue / 10
+else
+	wscript.quit 0
+end if
+' Return the values to SCOM
+Set oBag = oAPI.CreatePropertyBag()
+Call oBag.AddValue("DeviceIP", strDeviceIP)
+Call oBag.AddValue("PerfValue", decValue )
+Call oAPI.Return(oBag)
+	</ScriptBody>
+            <TimeoutSeconds>60</TimeoutSeconds>
+            <ObjectName>$Target/Property[Type="NetworkLibrary!System.NetworkManagement.Node"]/sysName$</ObjectName>
+            <CounterName>Load Percentage</CounterName>
+            <InstanceName>$Target/Property[Type="NetworkLibrary!System.NetworkManagement.Node"]/Location$</InstanceName>
+            <Value>$Data/Property[@Name='PerfValue']$</Value>
+          </DataSource>
+        </DataSources>
+        <WriteActions>
+          <WriteAction ID="WriteToDB" TypeID="SC!Microsoft.SystemCenter.CollectPerformanceData" />
+          <WriteAction ID="WriteToDW" TypeID="SCDW!Microsoft.SystemCenter.DataWarehouse.PublishPerformanceData" />
+        </WriteActions>
+      </Rule>
+      <Rule ID="MPCHM.UPS.APC.Rule.IncomeVolt" Enabled="true" Target="MPCHM.UPS.APC" ConfirmDelivery="false" Remotable="true" Priority="Normal" DiscardLevel="100">
+        <Category>PerformanceCollection</Category>
+        <DataSources>
+          <DataSource ID="DS" TypeID="Windows!Microsoft.Windows.TimedScript.PerformanceProvider">
+            <IntervalSeconds>300</IntervalSeconds>
+            <SyncTime />
+            <ScriptName>upsIncVolt.vbs</ScriptName>
+            <Arguments>$Target/Property[Type="NetworkLibrary!System.NetworkManagement.Node"]/SNMPAddress$ $RunAs[Name="NetworkLibrary!System.NetworkManagement.Snmp.MonitoringAccount"]/CommunityString$ $Target/Property[Type="NetworkLibrary!System.NetworkManagement.Node"]/SNMPVersion$</Arguments>
+            <ScriptBody>Dim oAPI, oBag
+Set oAPI = CreateObject("MOM.ScriptAPI")
+On Error Resume Next
+err.clear
+Dim oArgs
+Set oArgs = WScript.Arguments
+strDeviceIP = oArgs(0)
+strCommunity = oArgs(1)
+strVersion = oArgs(2)
+set objSNMP = CreateObject("OlePrn.OleSNMP")
+objSNMP.Open strDeviceIP, strCommunity, strVersion, 1000
+decValue = Int(objSNMP.Get(".1.3.6.1.4.1.318.1.1.1.3.3.1.0"))
+if err.number = 0 then
+   ' Number is 10 times as big.
+   decValue = decValue / 10
+else
+	wscript.quit 0
+end if
+' Return the values to SCOM
+Set oBag = oAPI.CreatePropertyBag()
+Call oBag.AddValue("DeviceIP", strDeviceIP)
+Call oBag.AddValue("PerfValue", decValue )
+Call oAPI.Return(oBag)</ScriptBody>
+            <TimeoutSeconds>60</TimeoutSeconds>
+            <ObjectName>$Target/Property[Type="NetworkLibrary!System.NetworkManagement.Node"]/sysName$</ObjectName>
+            <CounterName>Voltage (Volts)</CounterName>
+            <InstanceName>$Target/Property[Type="NetworkLibrary!System.NetworkManagement.Node"]/Location$</InstanceName>
+            <Value>$Data/Property[@Name='PerfValue']$</Value>
+          </DataSource>
+        </DataSources>
+        <WriteActions>
+          <WriteAction ID="WriteToDB" TypeID="SC!Microsoft.SystemCenter.CollectPerformanceData" />
+          <WriteAction ID="WriteToDW" TypeID="SCDW!Microsoft.SystemCenter.DataWarehouse.PublishPerformanceData" />
+        </WriteActions>
+      </Rule>
+      <Rule ID="MPCHM.UPS.APC.Rule.BatteryTime" Enabled="true" Target="MPCHM.UPS.APC" ConfirmDelivery="false" Remotable="true" Priority="Normal" DiscardLevel="100">
+        <Category>PerformanceCollection</Category>
+        <DataSources>
+          <DataSource ID="DS" TypeID="Windows!Microsoft.Windows.TimedScript.PerformanceProvider">
+            <IntervalSeconds>300</IntervalSeconds>
+            <SyncTime />
+            <ScriptName>upsBatTime.vbs</ScriptName>
+            <Arguments>$Target/Property[Type="NetworkLibrary!System.NetworkManagement.Node"]/SNMPAddress$ $RunAs[Name="NetworkLibrary!System.NetworkManagement.Snmp.MonitoringAccount"]/CommunityString$ $Target/Property[Type="NetworkLibrary!System.NetworkManagement.Node"]/SNMPVersion$</Arguments>
+            <ScriptBody>Dim oAPI, oBag
+Set oAPI = CreateObject("MOM.ScriptAPI")
+On Error Resume Next
+err.clear
+Dim oArgs
+Set oArgs = WScript.Arguments
+strDeviceIP = oArgs(0)
+strCommunity = oArgs(1)
+strVersion = oArgs(2)
+set objSNMP = CreateObject("OlePrn.OleSNMP")
+objSNMP.Open strDeviceIP, strCommunity, strVersion, 1000
+intValue = Int(objSNMP.Get(".1.3.6.1.4.1.318.1.1.1.2.2.3.0"))
+if err.number = 0 then
+   ' You can calculate the value here
+   ' 1/100seconds to seconds
+   intValue = intValue  / 100
+       ' seconds to minutes
+   intValue = intValue  / 60
+else
+	wscript.quit 0
+end if
+' Return the values to SCOM
+Set oBag = oAPI.CreatePropertyBag()
+Call oBag.AddValue("DeviceIP", strDeviceIP)
+Call oBag.AddValue("PerfValue", intValue )
+Call oAPI.Return(oBag)		</ScriptBody>
+            <TimeoutSeconds>60</TimeoutSeconds>
+            <ObjectName>$Target/Property[Type="NetworkLibrary!System.NetworkManagement.Node"]/sysName$</ObjectName>
+            <CounterName>Time Remaining (Minutes)</CounterName>
+            <InstanceName>$Target/Property[Type="NetworkLibrary!System.NetworkManagement.Node"]/Location$</InstanceName>
+            <Value>$Data/Property[@Name='PerfValue']$</Value>
+          </DataSource>
+        </DataSources>
+        <WriteActions>
+          <WriteAction ID="WriteToDB" TypeID="SC!Microsoft.SystemCenter.CollectPerformanceData" />
+          <WriteAction ID="WriteToDW" TypeID="SCDW!Microsoft.SystemCenter.DataWarehouse.PublishPerformanceData" />
+        </WriteActions>
+      </Rule>	  
+    </Rules>
+    <Monitors>
+	 <UnitMonitor ID="MPCHM.UPS.APC.ExtTempProbe.Monitor.ExtTemp" Accessibility="Public" Enabled="true" Target="MPCHM.UPS.APC.ExtTempProbe" ParentMonitorID="Health!System.Health.PerformanceState" Remotable="true" Priority="Normal" TypeID="NetworkLibrary!System.NetworkManagement.SnmpProbe.2SingleEvent2StateMonitorType" ConfirmDelivery="false">
+        <Category>Custom</Category>
+        <AlertSettings AlertMessage="MPCHM.UPS.APC.ExtTempProbe.Monitor.ExtTemp.AlertMessage">
+          <AlertOnState>Warning</AlertOnState>
+          <AutoResolve>true</AutoResolve>
+          <AlertPriority>Normal</AlertPriority>
+          <AlertSeverity>Error</AlertSeverity>
+		  <AlertParameters>
+            <AlertParameter1>$Data/Context/SnmpVarBinds/SnmpVarBind[1]/Value$</AlertParameter1>
+            <AlertParameter2>$Target/Property[Type="NetworkLibrary!System.NetworkManagement.Node"]/sysName$</AlertParameter2>
+			<AlertParameter3>$Target/Property[Type="NetworkLibrary!System.NetworkManagement.Node"]/Location$</AlertParameter3>
+			<AlertParameter4>$Target/Property[Type="NetworkLibrary!System.NetworkManagement.Node"]/SNMPAddress$</AlertParameter4>
+			<AlertParameter5>$Target/Property[Type="NetworkLibrary!System.NetworkManagement.Node"]/Model$</AlertParameter5>
+			<AlertParameter6>$Target/Property[Type="NetworkLibrary!System.NetworkManagement.Node"]/PrimaryOwnerContact$</AlertParameter6>
+          </AlertParameters>
+        </AlertSettings>
+        <OperationalStates>
+          <OperationalState ID="SecondEventRaised" MonitorTypeStateID="SecondEventRaised" HealthState="Warning" />
+          <OperationalState ID="FirstEventRaised" MonitorTypeStateID="FirstEventRaised" HealthState="Success" />
+        </OperationalStates>
+        <Configuration>
+          <FirstInterval>120</FirstInterval>
+          <FirstIP>$Target/Property[Type="NetworkLibrary!System.NetworkManagement.Node"]/SNMPAddress$</FirstIP>
+          <FirstVersion>$Target/Property[Type="NetworkLibrary!System.NetworkManagement.Node"]/SNMPVersion$</FirstVersion>
+          <FirstSnmpVarBinds>
+            <SnmpVarBind>
+              <OID>.1.3.6.1.4.1.318.1.1.10.2.3.2.1.4.1</OID>
+              <Syntax>0</Syntax>
+              <Value VariantType="3" />
+            </SnmpVarBind>
+          </FirstSnmpVarBinds>
+          <FirstExpression>
+            <SimpleExpression>
+              <ValueExpression>
+                <XPathQuery Type="Integer">/DataItem/SnmpVarBinds/SnmpVarBind[1]/Value </XPathQuery>
+              </ValueExpression>
+              <Operator>Less</Operator>
+              <ValueExpression>
+                <Value Type="Integer">87</Value>
+              </ValueExpression>
+            </SimpleExpression>
+          </FirstExpression>
+          <SecondInterval>120</SecondInterval>
+          <SecondIP>$Target/Property[Type="NetworkLibrary!System.NetworkManagement.Node"]/SNMPAddress$</SecondIP>
+          <SecondVersion>$Target/Property[Type="NetworkLibrary!System.NetworkManagement.Node"]/SNMPVersion$</SecondVersion>
+          <SecondSnmpVarBinds>
+            <SnmpVarBind>
+              <OID>.1.3.6.1.4.1.318.1.1.10.2.3.2.1.4.1</OID>
+              <Syntax>0</Syntax>
+              <Value VariantType="3" />
+            </SnmpVarBind>
+          </SecondSnmpVarBinds>
+          <SecondExpression>
+            <SimpleExpression>
+              <ValueExpression>
+                <XPathQuery Type="Integer">/DataItem/SnmpVarBinds/SnmpVarBind[1]/Value</XPathQuery>
+              </ValueExpression>
+              <Operator>GreaterEqual</Operator>
+              <ValueExpression>
+                <Value Type="Integer">87</Value>
+              </ValueExpression>
+            </SimpleExpression>
+          </SecondExpression>
+          <NoOfRetries>3</NoOfRetries>
+          <Timeout>500</Timeout>
+          <Port>$Target/Property[Type="NetworkLibrary!System.NetworkManagement.Node"]/PortNumber$</Port>
+        </Configuration>
+     </UnitMonitor>
+	 <UnitMonitor ID="MPCHM.UPS.APC.Monitor.IntTemp" Accessibility="Public" Enabled="true" Target="MPCHM.UPS.APC" ParentMonitorID="Health!System.Health.PerformanceState" Remotable="true" Priority="Normal" TypeID="Windows!Microsoft.Windows.TimedScript.ThreeStateMonitorType" ConfirmDelivery="false">
+        <Category>Custom</Category>
+        <AlertSettings AlertMessage="MPCHM.UPS.APC.Monitor.IntTemp.AlertMessage">
+          <AlertOnState>Warning</AlertOnState>
+          <AutoResolve>true</AutoResolve>
+          <AlertPriority>Normal</AlertPriority>
+          <AlertSeverity>Error</AlertSeverity>
+		  <AlertParameters>
+            <AlertParameter1>$Data/Context/Property[@Name='PerfValue']$</AlertParameter1>
+            <AlertParameter2>$Target/Property[Type="NetworkLibrary!System.NetworkManagement.Node"]/sysName$</AlertParameter2>
+			<AlertParameter3>$Data/Context/Property[@Name='Location']$</AlertParameter3>
+			<AlertParameter4>$Target/Property[Type="NetworkLibrary!System.NetworkManagement.Node"]/SNMPAddress$</AlertParameter4>
+			<AlertParameter5>$Target/Property[Type="NetworkLibrary!System.NetworkManagement.Node"]/Model$</AlertParameter5>
+			<AlertParameter6>$Target/Property[Type="NetworkLibrary!System.NetworkManagement.Node"]/PrimaryOwnerContact$</AlertParameter6>
+          </AlertParameters>
+        </AlertSettings>
+        <OperationalStates>
+          <OperationalState ID="Healthy" MonitorTypeStateID="Success" HealthState="Success" />
+          <OperationalState ID="Critical" MonitorTypeStateID="Error" HealthState="Error" />
+          <OperationalState ID="Warning" MonitorTypeStateID="Warning" HealthState="Warning" />
+        </OperationalStates>
+        <Configuration>
+         <IntervalSeconds>300</IntervalSeconds>
+            <SyncTime />
+            <ScriptName>upsIntTempF.vbs</ScriptName>
+            <Arguments>$Target/Property[Type="NetworkLibrary!System.NetworkManagement.Node"]/SNMPAddress$ $RunAs[Name="NetworkLibrary!System.NetworkManagement.Snmp.MonitoringAccount"]/CommunityString$ $Target/Property[Type="NetworkLibrary!System.NetworkManagement.Node"]/SNMPVersion$ $Target/Property[Type="NetworkLibrary!System.NetworkManagement.Node"]/Location$</Arguments>
+            <ScriptBody>
+				Dim oAPI, oBag
+				Set oAPI = CreateObject("MOM.ScriptAPI")
+				On Error Resume Next
+				err.clear
+				Dim oArgs
+				Set oArgs = WScript.Arguments
+				strDeviceIP = oArgs(0)
+				strCommunity = oArgs(1)
+				strVersion = oArgs(2)
+				strLocation = oArgs(3)
+				
+				strLocation = Replace(strLocation, "amp;", "")
+				
+				set objSNMP = CreateObject("OlePrn.OleSNMP")
+				objSNMP.Open strDeviceIP, strCommunity, strVersion, 1000
+				decValue = Int(objSNMP.Get(".1.3.6.1.4.1.318.1.1.1.2.3.2.0"))
+				if err.number = 0 then
+					decValue = decValue / 10
+					decValue = decValue * (9/5) + 32
+				  ' Already in fahrenheit
+				else
+					wscript.quit 0
+				end if
+				
+				' Return the values to SCOM
+				Set oBag = oAPI.CreatePropertyBag()
+				Call oBag.AddValue("DeviceIP", strDeviceIP)
+				Call oBag.AddValue("PerfValue", decValue )
+				Call oBag.AddValue("Location", strLocation )
+				
+				Call oAPI.Return(oBag)	
+			</ScriptBody>
+			<TimeoutSeconds>120</TimeoutSeconds>
+		  <ErrorExpression>
+            <SimpleExpression>
+              <ValueExpression>
+                <XPathQuery Type="Integer">Property[@Name='PerfValue']</XPathQuery>
+              </ValueExpression>
+              <Operator>LessEqual</Operator>
+              <ValueExpression>
+                <Value Type="Integer">99</Value>
+              </ValueExpression>
+            </SimpleExpression>
+          </ErrorExpression>
+          <WarningExpression>
+            <And>
+              <Expression>
+                <SimpleExpression>
+                  <ValueExpression>
+                    <XPathQuery Type="Integer">Property[@Name='PerfValue']</XPathQuery>
+                  </ValueExpression>
+                  <Operator>Greater</Operator>
+                  <ValueExpression>
+                    <Value Type="Integer">99</Value>
+                  </ValueExpression>
+                </SimpleExpression>
+              </Expression>
+              <Expression>
+                <SimpleExpression>
+                  <ValueExpression>
+                    <XPathQuery Type="Integer">Property[@Name='PerfValue']</XPathQuery>
+                  </ValueExpression>
+                  <Operator>Less</Operator>
+                  <ValueExpression>
+                    <Value Type="Integer">107</Value>
+                  </ValueExpression>
+                </SimpleExpression>
+              </Expression>
+            </And>
+          </WarningExpression>
+          <SuccessExpression>
+            <SimpleExpression>
+              <ValueExpression>
+                <XPathQuery Type="Integer">Property[@Name='PerfValue']</XPathQuery>
+              </ValueExpression>
+              <Operator>GreaterEqual</Operator>
+              <ValueExpression>
+                <Value Type="Integer">107</Value>
+              </ValueExpression>
+            </SimpleExpression>
+          </SuccessExpression>
+        </Configuration>
+     </UnitMonitor>
+	 <UnitMonitor ID="MPCHM.UPS.APC.Monitor.LoadPerc" Accessibility="Public" Enabled="true" Target="MPCHM.UPS.APC" ParentMonitorID="Health!System.Health.PerformanceState" Remotable="true" Priority="Normal" TypeID="Windows!Microsoft.Windows.TimedScript.TwoStateMonitorType" ConfirmDelivery="false">
+        <Category>Custom</Category>
+        <AlertSettings AlertMessage="MPCHM.UPS.APC.Monitor.LoadPerc.AlertMessage">
+          <AlertOnState>Warning</AlertOnState>
+          <AutoResolve>true</AutoResolve>
+          <AlertPriority>Normal</AlertPriority>
+          <AlertSeverity>Error</AlertSeverity>
+		  <AlertParameters>
+            <AlertParameter1>$Data/Context/Property[@Name='PerfValue']$</AlertParameter1>
+            <AlertParameter2>$Target/Property[Type="NetworkLibrary!System.NetworkManagement.Node"]/sysName$</AlertParameter2>
+			<AlertParameter3>$Data/Context/Property[@Name='Location']$</AlertParameter3>
+			<AlertParameter4>$Target/Property[Type="NetworkLibrary!System.NetworkManagement.Node"]/SNMPAddress$</AlertParameter4>
+			<AlertParameter5>$Target/Property[Type="NetworkLibrary!System.NetworkManagement.Node"]/Model$</AlertParameter5>
+			<AlertParameter6>$Target/Property[Type="NetworkLibrary!System.NetworkManagement.Node"]/PrimaryOwnerContact$</AlertParameter6>
+          </AlertParameters>
+        </AlertSettings>
+        <OperationalStates>
+			<OperationalState ID="Healthy" MonitorTypeStateID="Success" HealthState="Success" />
+			<OperationalState ID="Warning" MonitorTypeStateID="Error" HealthState="Error" />
+		</OperationalStates>
+        <Configuration>
+            <IntervalSeconds>300</IntervalSeconds>
+            <SyncTime />
+            <ScriptName>upsLoadPerc.vbs</ScriptName>
+            <Arguments>$Target/Property[Type="NetworkLibrary!System.NetworkManagement.Node"]/SNMPAddress$ $RunAs[Name="NetworkLibrary!System.NetworkManagement.Snmp.MonitoringAccount"]/CommunityString$ $Target/Property[Type="NetworkLibrary!System.NetworkManagement.Node"]/SNMPVersion$ $Target/Property[Type="NetworkLibrary!System.NetworkManagement.Node"]/Location$</Arguments>
+            <ScriptBody>Dim oAPI, oBag
+				Set oAPI = CreateObject("MOM.ScriptAPI")
+				On Error Resume Next
+				err.clear
+				Dim oArgs
+				Set oArgs = WScript.Arguments
+				strDeviceIP = oArgs(0)
+				strCommunity = oArgs(1)
+				strVersion = oArgs(2)
+				strLocation = oArgs(3)				
+				set objSNMP = CreateObject("OlePrn.OleSNMP")
+				objSNMP.Open strDeviceIP, strCommunity, strVersion, 1000
+				decValue = Int(objSNMP.Get(".1.3.6.1.4.1.318.1.1.1.4.3.3.0"))
+				if err.number = 0 then
+				   ' Divide by ten to get correct value
+				   decValue = decValue / 10
+				else
+					wscript.quit 0
+				end if
+				' Return the values to SCOM
+				Set oBag = oAPI.CreatePropertyBag()
+				Call oBag.AddValue("DeviceIP", strDeviceIP)
+				Call oBag.AddValue("PerfValue", decValue )
+				Call oBag.AddValue("Location", strLocation )
+				Call oAPI.Return(oBag)
+			</ScriptBody>
+            <TimeoutSeconds>60</TimeoutSeconds>	  
+			<ErrorExpression>
+				<SimpleExpression>
+                  <ValueExpression>
+                    <XPathQuery Type="Integer">Property[@Name='PerfValue']</XPathQuery>
+                  </ValueExpression>
+                  <Operator>Greater</Operator>
+                  <ValueExpression>
+                    <Value Type="Integer">60</Value>
+                  </ValueExpression>
+                </SimpleExpression>
+			</ErrorExpression>
+			<SuccessExpression>
+				  <SimpleExpression>
+                  <ValueExpression>
+                    <XPathQuery Type="Integer">Property[@Name='PerfValue']</XPathQuery>
+                  </ValueExpression>
+                  <Operator>LessEqual</Operator>
+                  <ValueExpression>
+                    <Value Type="Integer">60</Value>
+                  </ValueExpression>
+                </SimpleExpression>
+			</SuccessExpression>
+        </Configuration>
+      </UnitMonitor>
+	 <UnitMonitor ID="MPCHM.UPS.APC.Monitor.BatteryState" Accessibility="Public" Enabled="true" Target="MPCHM.UPS.APC" ParentMonitorID="Health!System.Health.PerformanceState" Remotable="true" Priority="Normal" TypeID="NetworkLibrary!System.NetworkManagement.SnmpProbe.2SingleEvent2StateMonitorType" ConfirmDelivery="false">
+        <Category>Custom</Category>
+        <AlertSettings AlertMessage="MPCHM.UPS.APC.Monitor.BatteryState.AlertMessage">
+          <AlertOnState>Warning</AlertOnState>
+          <AutoResolve>true</AutoResolve>
+          <AlertPriority>Normal</AlertPriority>
+          <AlertSeverity>Error</AlertSeverity>
+		  <AlertParameters>
+            <AlertParameter1>$Target/Property[Type="NetworkLibrary!System.NetworkManagement.Node"]/sysName$</AlertParameter1>
+			<AlertParameter2>$Target/Property[Type="NetworkLibrary!System.NetworkManagement.Node"]/Location$</AlertParameter2>
+			<AlertParameter3>$Target/Property[Type="NetworkLibrary!System.NetworkManagement.Node"]/SNMPAddress$</AlertParameter3>
+			<AlertParameter4>$Target/Property[Type="NetworkLibrary!System.NetworkManagement.Node"]/Model$</AlertParameter4>
+			<AlertParameter5>$Target/Property[Type="NetworkLibrary!System.NetworkManagement.Node"]/PrimaryOwnerContact$</AlertParameter5>
+          </AlertParameters>
+        </AlertSettings>
+        <OperationalStates>
+          <OperationalState ID="SecondEventRaised" MonitorTypeStateID="SecondEventRaised" HealthState="Warning" />
+          <OperationalState ID="FirstEventRaised" MonitorTypeStateID="FirstEventRaised" HealthState="Success" />
+        </OperationalStates>
+        <Configuration>
+          <FirstInterval>15</FirstInterval>
+          <FirstIP>$Target/Property[Type="NetworkLibrary!System.NetworkManagement.Node"]/SNMPAddress$</FirstIP>
+          <FirstVersion>$Target/Property[Type="NetworkLibrary!System.NetworkManagement.Node"]/SNMPVersion$</FirstVersion>
+          <FirstSnmpVarBinds>
+            <SnmpVarBind>
+              <OID>.1.3.6.1.4.1.318.1.1.1.2.1.2.0</OID>
+              <Syntax>0</Syntax>
+              <Value VariantType="3" />
+            </SnmpVarBind>
+          </FirstSnmpVarBinds>
+          <FirstExpression>
+            <SimpleExpression>
+              <ValueExpression>
+                <XPathQuery Type="Integer">/DataItem/SnmpVarBinds/SnmpVarBind[1]/Value </XPathQuery>
+              </ValueExpression>
+              <Operator>Equal</Operator>
+              <ValueExpression>
+                <Value Type="Integer">0</Value>
+              </ValueExpression>
+            </SimpleExpression>
+          </FirstExpression>
+          <SecondInterval>15</SecondInterval>
+          <SecondIP>$Target/Property[Type="NetworkLibrary!System.NetworkManagement.Node"]/SNMPAddress$</SecondIP>
+          <SecondVersion>$Target/Property[Type="NetworkLibrary!System.NetworkManagement.Node"]/SNMPVersion$</SecondVersion>
+          <SecondSnmpVarBinds>
+            <SnmpVarBind>
+              <OID>.1.3.6.1.4.1.318.1.1.1.2.1.2.0</OID>
+              <Syntax>0</Syntax>
+              <Value VariantType="3" />
+            </SnmpVarBind>
+          </SecondSnmpVarBinds>
+          <SecondExpression>
+            <SimpleExpression>
+              <ValueExpression>
+                <XPathQuery Type="Integer">/DataItem/SnmpVarBinds/SnmpVarBind[1]/Value</XPathQuery>
+              </ValueExpression>
+              <Operator>Greater</Operator>
+              <ValueExpression>
+                <Value Type="Integer">0</Value>
+              </ValueExpression>
+            </SimpleExpression>
+          </SecondExpression>
+          <NoOfRetries>3</NoOfRetries>
+          <Timeout>500</Timeout>
+          <Port>$Target/Property[Type="NetworkLibrary!System.NetworkManagement.Node"]/PortNumber$</Port>		  
+        </Configuration>
+      </UnitMonitor>
+	 <UnitMonitor ID="MPCHM.UPS.APC.Monitor.BatteryTimeTriple" Accessibility="Public" Enabled="true" Target="MPCHM.UPS.APC" ParentMonitorID="Health!System.Health.PerformanceState" Remotable="true" Priority="Normal" TypeID="Windows!Microsoft.Windows.TimedScript.ThreeStateMonitorType" ConfirmDelivery="false">
+        <Category>Custom</Category>
+        <AlertSettings AlertMessage="MPCHM.UPS.APC.Monitor.BatteryTimeTriple.AlertMessage">
+          <AlertOnState>Warning</AlertOnState>
+          <AutoResolve>true</AutoResolve>
+          <AlertPriority>Normal</AlertPriority>
+          <AlertSeverity>MatchMonitorHealth</AlertSeverity>
+		  <AlertParameters>
+            <AlertParameter1>$Data/Context/Property[@Name='PerfValue']$</AlertParameter1>
+            <AlertParameter2>$Target/Property[Type="NetworkLibrary!System.NetworkManagement.Node"]/sysName$</AlertParameter2>
+			<AlertParameter3>$Data/Context/Property[@Name='Location']$</AlertParameter3>
+			<AlertParameter4>$Target/Property[Type="NetworkLibrary!System.NetworkManagement.Node"]/SNMPAddress$</AlertParameter4>
+			<AlertParameter5>$Target/Property[Type="NetworkLibrary!System.NetworkManagement.Node"]/Model$</AlertParameter5>
+			<AlertParameter6>$Target/Property[Type="NetworkLibrary!System.NetworkManagement.Node"]/PrimaryOwnerContact$</AlertParameter6>
+          </AlertParameters>		 
+		 </AlertSettings>
+        <OperationalStates>
+          <OperationalState ID="Healthy" MonitorTypeStateID="Success" HealthState="Success" />
+          <OperationalState ID="Critical" MonitorTypeStateID="Error" HealthState="Error" />
+          <OperationalState ID="Warning" MonitorTypeStateID="Warning" HealthState="Warning" />
+        </OperationalStates>
+        <Configuration>
+          <IntervalSeconds>600</IntervalSeconds>
+          <SyncTime />
+          <ScriptName>runtimeTripState.vbs</ScriptName>
+          <Arguments>$Target/Property[Type="NetworkLibrary!System.NetworkManagement.Node"]/SNMPAddress$ $RunAs[Name="NetworkLibrary!System.NetworkManagement.Snmp.MonitoringAccount"]/CommunityString$ $Target/Property[Type="NetworkLibrary!System.NetworkManagement.Node"]/SNMPVersion$ $Target/Property[Type="NetworkLibrary!System.NetworkManagement.Node"]/Location$</Arguments>
+			<ScriptBody>Dim oAPI, oBag
+				Set oAPI = CreateObject("MOM.ScriptAPI")
+				On Error Resume Next
+				err.clear
+				Dim oArgs
+				Set oArgs = WScript.Arguments
+				strDeviceIP = oArgs(0)
+				strCommunity = oArgs(1)
+				strVersion = oArgs(2)
+				strLocation = oArgs(3)
+				
+				set objSNMP = CreateObject("OlePrn.OleSNMP")
+				objSNMP.Open strDeviceIP, strCommunity, strVersion, 1000
+				intValue = Int(objSNMP.Get(".1.3.6.1.4.1.318.1.1.1.2.2.3.0"))
+				if err.number = 0 then
+				   ' You can calculate the value here
+				   ' 1/100seconds to seconds
+				   intValue = intValue  / 100
+					   ' seconds to minutes
+				   intValue = intValue  / 60
+				else
+					wscript.quit 0
+				end if
+				' Return the values to SCOM
+				Set oBag = oAPI.CreatePropertyBag()
+				Call oBag.AddValue("DeviceIP", strDeviceIP)
+				Call oBag.AddValue("PerfValue", intValue )
+				Call oBag.AddValue("Location", strLocation )
+				Call oAPI.Return(oBag)
+			</ScriptBody>
+          <TimeoutSeconds>120</TimeoutSeconds>
+          <ErrorExpression>
+            <SimpleExpression>
+              <ValueExpression>
+                <XPathQuery Type="Integer">Property[@Name='PerfValue']</XPathQuery>
+              </ValueExpression>
+              <Operator>LessEqual</Operator>
+              <ValueExpression>
+                <Value Type="Integer">10</Value>
+              </ValueExpression>
+            </SimpleExpression>
+          </ErrorExpression>
+          <WarningExpression>
+            <And>
+              <Expression>
+                <SimpleExpression>
+                  <ValueExpression>
+                    <XPathQuery Type="Integer">Property[@Name='PerfValue']</XPathQuery>
+                  </ValueExpression>
+                  <Operator>Greater</Operator>
+                  <ValueExpression>
+                    <Value Type="Integer">10</Value>
+                  </ValueExpression>
+                </SimpleExpression>
+              </Expression>
+              <Expression>
+                <SimpleExpression>
+                  <ValueExpression>
+                    <XPathQuery Type="Integer">Property[@Name='PerfValue']</XPathQuery>
+                  </ValueExpression>
+                  <Operator>Less</Operator>
+                  <ValueExpression>
+                    <Value Type="Integer">15</Value>
+                  </ValueExpression>
+                </SimpleExpression>
+              </Expression>
+            </And>
+          </WarningExpression>
+          <SuccessExpression>
+            <SimpleExpression>
+              <ValueExpression>
+                <XPathQuery Type="Integer">Property[@Name='PerfValue']</XPathQuery>
+              </ValueExpression>
+              <Operator>GreaterEqual</Operator>
+              <ValueExpression>
+                <Value Type="Integer">15</Value>
+              </ValueExpression>
+            </SimpleExpression>
+          </SuccessExpression>
+        </Configuration>
+      </UnitMonitor>
+	 <UnitMonitor ID="MPCHM.UPS.APC.Monitor.IncomeVolt" Accessibility="Public" Enabled="true" Target="MPCHM.UPS.APC" ParentMonitorID="Health!System.Health.PerformanceState" Remotable="true" Priority="Normal" TypeID="Windows!Microsoft.Windows.TimedScript.TwoStateMonitorType" ConfirmDelivery="false">
+        <Category>Custom</Category>
+        <AlertSettings AlertMessage="MPCHM.UPS.APC.Monitor.IncomeVolt.AlertMessage">
+          <AlertOnState>Error</AlertOnState>
+          <AutoResolve>true</AutoResolve>
+          <AlertPriority>Normal</AlertPriority>
+          <AlertSeverity>Error</AlertSeverity>
+		  <AlertParameters>
+            <AlertParameter1>$Data/Context/Property[@Name='PerfValue']$</AlertParameter1>
+            <AlertParameter2>$Target/Property[Type="NetworkLibrary!System.NetworkManagement.Node"]/sysName$</AlertParameter2>
+			<AlertParameter3>$Data/Context/Property[@Name='Location']$</AlertParameter3>
+			<AlertParameter4>$Target/Property[Type="NetworkLibrary!System.NetworkManagement.Node"]/SNMPAddress$</AlertParameter4>
+			<AlertParameter5>$Target/Property[Type="NetworkLibrary!System.NetworkManagement.Node"]/Model$</AlertParameter5>
+			<AlertParameter6>$Target/Property[Type="NetworkLibrary!System.NetworkManagement.Node"]/PrimaryOwnerContact$</AlertParameter6>
+          </AlertParameters>
+        </AlertSettings>
+        <OperationalStates>
+          <OperationalState ID="Healthy" MonitorTypeStateID="Success" HealthState="Success" />
+		  <OperationalState ID="Warning" MonitorTypeStateID="Error" HealthState="Error" />
+		</OperationalStates>
+        <Configuration>
+          <IntervalSeconds>300</IntervalSeconds>
+            <SyncTime />
+            <ScriptName>upsIncVolt.vbs</ScriptName>
+            <Arguments>$Target/Property[Type="NetworkLibrary!System.NetworkManagement.Node"]/SNMPAddress$ $RunAs[Name="NetworkLibrary!System.NetworkManagement.Snmp.MonitoringAccount"]/CommunityString$ $Target/Property[Type="NetworkLibrary!System.NetworkManagement.Node"]/SNMPVersion$ $Target/Property[Type="NetworkLibrary!System.NetworkManagement.Node"]/Location$</Arguments>
+            <ScriptBody>Dim oAPI, oBag
+				Set oAPI = CreateObject("MOM.ScriptAPI")
+				On Error Resume Next
+				err.clear
+				Dim oArgs
+				Set oArgs = WScript.Arguments
+				strDeviceIP = oArgs(0)
+				strCommunity = oArgs(1)
+				strVersion = oArgs(2)
+				strLocation = oArgs(3)
+
+				
+				set objSNMP = CreateObject("OlePrn.OleSNMP")
+				objSNMP.Open strDeviceIP, strCommunity, strVersion, 1000
+				decValue = Int(objSNMP.Get(".1.3.6.1.4.1.318.1.1.1.3.3.1.0"))
+				if err.number = 0 then
+				   ' Number is 10 times as big.
+				   decValue = decValue / 10
+				else
+					wscript.quit 0
+				end if
+				' Return the values to SCOM
+				Set oBag = oAPI.CreatePropertyBag()
+				Call oBag.AddValue("DeviceIP", strDeviceIP)
+				Call oBag.AddValue("PerfValue", decValue )
+				Call oBag.AddValue("Location", strLocation )
+				Call oAPI.Return(oBag)
+			</ScriptBody>
+			<TimeoutSeconds>120</TimeoutSeconds>
+			<ErrorExpression>
+               <And>
+				<Expression>
+				<SimpleExpression>
+                  <ValueExpression>
+                    <XPathQuery Type="Integer">Property[@Name='PerfValue']</XPathQuery>
+                  </ValueExpression>
+                  <Operator>Greater</Operator>
+                  <ValueExpression>
+                    <Value Type="Integer">123</Value>
+                  </ValueExpression>
+                </SimpleExpression>
+				</Expression>
+				<Expression>
+				  <SimpleExpression>
+                  <ValueExpression>
+                    <XPathQuery Type="Integer">Property[@Name='PerfValue']</XPathQuery>
+                  </ValueExpression>
+                  <Operator>Less</Operator>
+                  <ValueExpression>
+                    <Value Type="Integer">123</Value>
+                  </ValueExpression>
+                </SimpleExpression>
+				</Expression>
+				</And>
+			</ErrorExpression>
+			<SuccessExpression>
+            <And>
+				<Expression>
+				<SimpleExpression>
+                  <ValueExpression>
+                    <XPathQuery Type="Integer">Property[@Name='PerfValue']</XPathQuery>
+                  </ValueExpression>
+                  <Operator>GreaterEqual</Operator>
+                  <ValueExpression>
+                    <Value Type="Integer">117</Value>
+                  </ValueExpression>
+                </SimpleExpression>
+				</Expression>
+				<Expression>
+				  <SimpleExpression>
+                  <ValueExpression>
+                    <XPathQuery Type="Integer">Property[@Name='PerfValue']</XPathQuery>
+                  </ValueExpression>
+                  <Operator>LessEqual</Operator>
+                  <ValueExpression>
+                    <Value Type="Integer">123</Value>
+                  </ValueExpression>
+                </SimpleExpression>
+				</Expression>
+				</And>
+			</SuccessExpression>
+        </Configuration>
+      </UnitMonitor>
+	</Monitors>
+  </Monitoring>
+  <Presentation>
+    <Views>
+      <View ID="MPCHM.UPS.APC.View.State" Accessibility="Internal" Enabled="true" Target="MPCHM.UPS.APC" TypeID="SC!Microsoft.SystemCenter.StateViewType" Visible="true">
+        <Category>Operations</Category>
+        <Criteria>
+          <InMaintenanceMode>false</InMaintenanceMode>
+        </Criteria>
+        <Presentation>
+          <ColumnInfo Index="0" SortIndex="-1" Width="100" Grouped="false" Sorted="false" IsSortable="true" Visible="true" SortOrder="Ascending">
+            <Name>Name</Name>
+            <Id>Name</Id>
+          </ColumnInfo>
+          <ColumnInfo Index="1" SortIndex="-1" Width="100" Grouped="false" Sorted="false" IsSortable="true" Visible="true" SortOrder="Ascending">
+            <Name>Display Name</Name>
+            <Id>System.Entity/DisplayName</Id>
+          </ColumnInfo>
+          <ColumnInfo Index="2" SortIndex="-1" Width="100" Grouped="false" Sorted="false" IsSortable="true" Visible="true" SortOrder="Ascending">
+            <Name>Access Mode</Name>
+            <Id>System.NetworkManagement.Node/AccessMode</Id>
+          </ColumnInfo>
+          <ColumnInfo Index="3" SortIndex="-1" Width="100" Grouped="false" Sorted="false" IsSortable="true" Visible="true" SortOrder="Ascending">
+            <Name>Certification</Name>
+            <Id>System.NetworkManagement.Node/Certification</Id>
+          </ColumnInfo>
+          <ColumnInfo Index="4" SortIndex="-1" Width="100" Grouped="false" Sorted="false" IsSortable="true" Visible="true" SortOrder="Ascending">
+            <Name>Description</Name>
+            <Id>System.NetworkManagement.Node/Description</Id>
+          </ColumnInfo>
+          <ColumnInfo Index="5" SortIndex="-1" Width="100" Grouped="false" Sorted="false" IsSortable="true" Visible="true" SortOrder="Ascending">
+            <Name>Location</Name>
+            <Id>System.NetworkManagement.Node/Location</Id>
+          </ColumnInfo>
+          <ColumnInfo Index="6" SortIndex="-1" Width="100" Grouped="false" Sorted="false" IsSortable="true" Visible="true" SortOrder="Ascending">
+            <Name>Model</Name>
+            <Id>System.NetworkManagement.Node/Model</Id>
+          </ColumnInfo>
+          <ColumnInfo Index="7" SortIndex="-1" Width="100" Grouped="false" Sorted="false" IsSortable="true" Visible="true" SortOrder="Ascending">
+            <Name>Object OID</Name>
+            <Id>System.NetworkManagement.Node/SystemObjectOID</Id>
+          </ColumnInfo>
+		  <ColumnInfo Index="7" SortIndex="-1" Width="100" Grouped="false" Sorted="false" IsSortable="true" Visible="true" SortOrder="Ascending">
+            <Name>Object OID</Name>
+            <Id>$MPElement[Name="MPCHM.UPS.APC"]/CalibrationDate$</Id>
+          </ColumnInfo>
+        </Presentation>
+        <Target />
+      </View>
+      <View ID="MPCHM.UPS.APC.ExtTempProbe.View.State" Accessibility="Internal" Enabled="true" Target="MPCHM.UPS.APC.ExtTempProbe" TypeID="SC!Microsoft.SystemCenter.StateViewType" Visible="true">
+        <Category>Operations</Category>
+        <Criteria>
+          <InMaintenanceMode>false</InMaintenanceMode>
+        </Criteria>
+        <Presentation>
+          <ColumnInfo Index="0" SortIndex="-1" Width="100" Grouped="false" Sorted="false" IsSortable="true" Visible="true" SortOrder="Ascending">
+            <Name>Name</Name>
+            <Id>Name</Id>
+          </ColumnInfo>
+          <ColumnInfo Index="1" SortIndex="-1" Width="100" Grouped="false" Sorted="false" IsSortable="true" Visible="true" SortOrder="Ascending">
+            <Name>Path</Name>
+            <Id>Path</Id>
+          </ColumnInfo>
+          <ColumnInfo Index="2" SortIndex="-1" Width="100" Grouped="false" Sorted="false" IsSortable="true" Visible="true" SortOrder="Ascending">
+            <Name>Display Name</Name>
+            <Id>System.Entity/DisplayName</Id>
+          </ColumnInfo>
+          <ColumnInfo Index="3" SortIndex="-1" Width="100" Grouped="false" Sorted="false" IsSortable="true" Visible="true" SortOrder="Ascending">
+            <Name>Access Mode</Name>
+            <Id>System.NetworkManagement.Node/AccessMode</Id>
+          </ColumnInfo>
+          <ColumnInfo Index="4" SortIndex="-1" Width="100" Grouped="false" Sorted="false" IsSortable="true" Visible="true" SortOrder="Ascending">
+            <Name>Certification</Name>
+            <Id>System.NetworkManagement.Node/Certification</Id>
+          </ColumnInfo>
+          <ColumnInfo Index="5" SortIndex="-1" Width="100" Grouped="false" Sorted="false" IsSortable="true" Visible="true" SortOrder="Ascending">
+            <Name>Description</Name>
+            <Id>System.NetworkManagement.Node/Description</Id>
+          </ColumnInfo>
+          <ColumnInfo Index="6" SortIndex="-1" Width="100" Grouped="false" Sorted="false" IsSortable="true" Visible="true" SortOrder="Ascending">
+            <Name>Location</Name>
+            <Id>System.NetworkManagement.Node/Location</Id>
+          </ColumnInfo>
+          <ColumnInfo Index="7" SortIndex="-1" Width="100" Grouped="false" Sorted="false" IsSortable="true" Visible="true" SortOrder="Ascending">
+            <Name>Model</Name>
+            <Id>System.NetworkManagement.Node/Model</Id>
+          </ColumnInfo>
+          <ColumnInfo Index="8" SortIndex="-1" Width="100" Grouped="false" Sorted="false" IsSortable="true" Visible="true" SortOrder="Ascending">
+            <Name>Object OID</Name>
+            <Id>System.NetworkManagement.Node/SystemObjectOID</Id>
+          </ColumnInfo>
+        </Presentation>
+        <Target />
+      </View>
+      <View ID="MPCHM.UPS.APC.View.BattState" Accessibility="Public" Enabled="true" Target="MPCHM.UPS.APC" TypeID="SC!Microsoft.SystemCenter.PerformanceViewType" Visible="true">
+        <Category>Operations</Category>
+        <Criteria>
+          <RuleList>
+            <Rule>$MPElement[Name="MPCHM.UPS.APC.Rule.BatteryState"]$</Rule>
+          </RuleList>
+        </Criteria>
+        <Presentation>
+          <SortedColumnIndex>0</SortedColumnIndex>
+          <SortOrder>0</SortOrder>
+          <StartTime>2013-08-05T13:08:12.2744161-04:00</StartTime>
+          <EndTime>2013-08-06T13:08:12.2744161-04:00</EndTime>
+          <DynamicTimeTicks>864000000000</DynamicTimeTicks>
+          <IsDynamic>true</IsDynamic>
+          <Is3DMode>false</Is3DMode>
+          <ShowAlerts>false</ShowAlerts>
+          <ShowMaintenanceMode>false</ShowMaintenanceMode>
+          <BaselineMode>false</BaselineMode>
+          <ShowPointLabels>false</ShowPointLabels>
+          <EnableSmartLabels>true</EnableSmartLabels>
+          <RightAngleAxes>false</RightAngleAxes>
+          <ClusterSeries>false</ClusterSeries>
+          <Title />
+          <TitleFont>Microsoft Sans Serif,12,Regular</TitleFont>
+          <ChartFont>Microsoft Sans Serif,8.25,Regular</ChartFont>
+          <ShowBands>false</ShowBands>
+          <BandColor>-1579033</BandColor>
+          <ChartType>Line</ChartType>
+          <Depth>100</Depth>
+          <GapDepth>100</GapDepth>
+          <Perspective>10</Perspective>
+          <GraphXRotation>0</GraphXRotation>
+          <GraphYRotation>0</GraphYRotation>
+          <XLabelAngle>0</XLabelAngle>
+          <LabelColor>-16777216</LabelColor>
+          <LabelFont>Microsoft Sans Serif,8.25,Regular</LabelFont>
+          <XAxisVisible>True</XAxisVisible>
+          <XShowMajorGridlines>false</XShowMajorGridlines>
+          <XShowMinorGridlines>false</XShowMinorGridlines>
+          <ShowInterlaceStrips>false</ShowInterlaceStrips>
+          <XInterlaceColor>16777215</XInterlaceColor>
+          <XShowSideMargin>true</XShowSideMargin>
+          <XAxisFont>Microsoft Sans Serif,8.25,Regular</XAxisFont>
+          <AutoAxis>true</AutoAxis>
+          <AxisMax>100</AxisMax>
+          <AxisMin>0</AxisMin>
+          <YAxisVisible>True</YAxisVisible>
+          <YShowMajorGridlines>true</YShowMajorGridlines>
+          <YShowMinorGridlines>false</YShowMinorGridlines>
+          <YShowInterlaceStrips>false</YShowInterlaceStrips>
+          <YShowSideMargin>true</YShowSideMargin>
+          <YAxisFont>Microsoft Sans Serif,8.25,Regular</YAxisFont>
+          <BackgroundColor1>-1</BackgroundColor1>
+          <BackgroundColor2>-1</BackgroundColor2>
+          <GradientType>None</GradientType>
+          <Series />
+        </Presentation>
+        <Target />
+      </View>
+      <View ID="MPCHM.UPS.APC.ExtTempProbe.View.ExtTempF" Accessibility="Public" Enabled="true" Target="MPCHM.UPS.APC.ExtTempProbe" TypeID="SC!Microsoft.SystemCenter.PerformanceViewType" Visible="true">
+        <Category>Operations</Category>
+        <Criteria>
+          <RuleList>
+            <Rule>$MPElement[Name="MPCHM.UPS.APC.ExtTempProbe.Rule.ExtTempF"]$</Rule>
+          </RuleList>
+        </Criteria>
+        <Presentation>
+          <SortedColumnIndex>0</SortedColumnIndex>
+          <SortOrder>0</SortOrder>
+          <StartTime>2013-08-05T13:19:50.6552472-04:00</StartTime>
+          <EndTime>2013-08-06T13:19:50.6552472-04:00</EndTime>
+          <DynamicTimeTicks>864000000000</DynamicTimeTicks>
+          <IsDynamic>true</IsDynamic>
+          <Is3DMode>false</Is3DMode>
+          <ShowAlerts>false</ShowAlerts>
+          <ShowMaintenanceMode>false</ShowMaintenanceMode>
+          <BaselineMode>false</BaselineMode>
+          <ShowPointLabels>false</ShowPointLabels>
+          <EnableSmartLabels>true</EnableSmartLabels>
+          <RightAngleAxes>false</RightAngleAxes>
+          <ClusterSeries>false</ClusterSeries>
+          <Title />
+          <TitleFont>Microsoft Sans Serif,12,Regular</TitleFont>
+          <ChartFont>Microsoft Sans Serif,8.25,Regular</ChartFont>
+          <ShowBands>false</ShowBands>
+          <BandColor>-1579033</BandColor>
+          <ChartType>Line</ChartType>
+          <Depth>100</Depth>
+          <GapDepth>100</GapDepth>
+          <Perspective>10</Perspective>
+          <GraphXRotation>0</GraphXRotation>
+          <GraphYRotation>0</GraphYRotation>
+          <XLabelAngle>0</XLabelAngle>
+          <LabelColor>-16777216</LabelColor>
+          <LabelFont>Microsoft Sans Serif,8.25,Regular</LabelFont>
+          <XAxisVisible>True</XAxisVisible>
+          <XShowMajorGridlines>false</XShowMajorGridlines>
+          <XShowMinorGridlines>false</XShowMinorGridlines>
+          <ShowInterlaceStrips>false</ShowInterlaceStrips>
+          <XInterlaceColor>16777215</XInterlaceColor>
+          <XShowSideMargin>true</XShowSideMargin>
+          <XAxisFont>Microsoft Sans Serif,8.25,Regular</XAxisFont>
+          <AutoAxis>true</AutoAxis>
+          <AxisMax>100</AxisMax>
+          <AxisMin>0</AxisMin>
+          <YAxisVisible>True</YAxisVisible>
+          <YShowMajorGridlines>true</YShowMajorGridlines>
+          <YShowMinorGridlines>false</YShowMinorGridlines>
+          <YShowInterlaceStrips>false</YShowInterlaceStrips>
+          <YShowSideMargin>true</YShowSideMargin>
+          <YAxisFont>Microsoft Sans Serif,8.25,Regular</YAxisFont>
+          <BackgroundColor1>-1</BackgroundColor1>
+          <BackgroundColor2>-1</BackgroundColor2>
+          <GradientType>None</GradientType>
+          <Series />
+        </Presentation>
+        <Target />
+      </View>
+	  <View ID="MPCHM.UPS.APC.View.IntTempF" Accessibility="Public" Enabled="true" Target="MPCHM.UPS.APC" TypeID="SC!Microsoft.SystemCenter.PerformanceViewType" Visible="true">
+        <Category>Operations</Category>
+        <Criteria>
+          <RuleList>
+            <Rule>$MPElement[Name="MPCHM.UPS.APC.Rule.IntTempF"]$</Rule>
+          </RuleList>
+        </Criteria>
+        <Presentation>
+          <SortedColumnIndex>0</SortedColumnIndex>
+          <SortOrder>0</SortOrder>
+          <StartTime>2013-08-05T13:19:50.6552472-04:00</StartTime>
+          <EndTime>2013-08-06T13:19:50.6552472-04:00</EndTime>
+          <DynamicTimeTicks>864000000000</DynamicTimeTicks>
+          <IsDynamic>true</IsDynamic>
+          <Is3DMode>false</Is3DMode>
+          <ShowAlerts>false</ShowAlerts>
+          <ShowMaintenanceMode>false</ShowMaintenanceMode>
+          <BaselineMode>false</BaselineMode>
+          <ShowPointLabels>false</ShowPointLabels>
+          <EnableSmartLabels>true</EnableSmartLabels>
+          <RightAngleAxes>false</RightAngleAxes>
+          <ClusterSeries>false</ClusterSeries>
+          <Title />
+          <TitleFont>Microsoft Sans Serif,12,Regular</TitleFont>
+          <ChartFont>Microsoft Sans Serif,8.25,Regular</ChartFont>
+          <ShowBands>false</ShowBands>
+          <BandColor>-1579033</BandColor>
+          <ChartType>Line</ChartType>
+          <Depth>100</Depth>
+          <GapDepth>100</GapDepth>
+          <Perspective>10</Perspective>
+          <GraphXRotation>0</GraphXRotation>
+          <GraphYRotation>0</GraphYRotation>
+          <XLabelAngle>0</XLabelAngle>
+          <LabelColor>-16777216</LabelColor>
+          <LabelFont>Microsoft Sans Serif,8.25,Regular</LabelFont>
+          <XAxisVisible>True</XAxisVisible>
+          <XShowMajorGridlines>false</XShowMajorGridlines>
+          <XShowMinorGridlines>false</XShowMinorGridlines>
+          <ShowInterlaceStrips>false</ShowInterlaceStrips>
+          <XInterlaceColor>16777215</XInterlaceColor>
+          <XShowSideMargin>true</XShowSideMargin>
+          <XAxisFont>Microsoft Sans Serif,8.25,Regular</XAxisFont>
+          <AutoAxis>true</AutoAxis>
+          <AxisMax>100</AxisMax>
+          <AxisMin>0</AxisMin>
+          <YAxisVisible>True</YAxisVisible>
+          <YShowMajorGridlines>true</YShowMajorGridlines>
+          <YShowMinorGridlines>false</YShowMinorGridlines>
+          <YShowInterlaceStrips>false</YShowInterlaceStrips>
+          <YShowSideMargin>true</YShowSideMargin>
+          <YAxisFont>Microsoft Sans Serif,8.25,Regular</YAxisFont>
+          <BackgroundColor1>-1</BackgroundColor1>
+          <BackgroundColor2>-1</BackgroundColor2>
+          <GradientType>None</GradientType>
+          <Series />
+        </Presentation>
+        <Target />
+      </View>
+      <View ID="MPCHM.UPS.APC.View.LoadPerc" Accessibility="Public" Enabled="true" Target="MPCHM.UPS.APC" TypeID="SC!Microsoft.SystemCenter.PerformanceViewType" Visible="true">
+        <Category>Operations</Category>
+        <Criteria>
+          <RuleList>
+            <Rule>$MPElement[Name="MPCHM.UPS.APC.Rule.LoadPerc"]$</Rule>
+          </RuleList>
+        </Criteria>
+        <Presentation>
+          <SortedColumnIndex>0</SortedColumnIndex>
+          <SortOrder>0</SortOrder>
+          <StartTime>2013-08-05T15:03:18.3729569-04:00</StartTime>
+          <EndTime>2013-08-06T15:03:18.3729569-04:00</EndTime>
+          <DynamicTimeTicks>864000000000</DynamicTimeTicks>
+          <IsDynamic>true</IsDynamic>
+          <Is3DMode>false</Is3DMode>
+          <ShowAlerts>false</ShowAlerts>
+          <ShowMaintenanceMode>false</ShowMaintenanceMode>
+          <BaselineMode>false</BaselineMode>
+          <ShowPointLabels>false</ShowPointLabels>
+          <EnableSmartLabels>true</EnableSmartLabels>
+          <RightAngleAxes>false</RightAngleAxes>
+          <ClusterSeries>false</ClusterSeries>
+          <Title />
+          <TitleFont>Microsoft Sans Serif,12,Regular</TitleFont>
+          <ChartFont>Microsoft Sans Serif,8.25,Regular</ChartFont>
+          <ShowBands>false</ShowBands>
+          <BandColor>-1579033</BandColor>
+          <ChartType>Line</ChartType>
+          <Depth>100</Depth>
+          <GapDepth>100</GapDepth>
+          <Perspective>10</Perspective>
+          <GraphXRotation>0</GraphXRotation>
+          <GraphYRotation>0</GraphYRotation>
+          <XLabelAngle>0</XLabelAngle>
+          <LabelColor>-16777216</LabelColor>
+          <LabelFont>Microsoft Sans Serif,8.25,Regular</LabelFont>
+          <XAxisVisible>True</XAxisVisible>
+          <XShowMajorGridlines>false</XShowMajorGridlines>
+          <XShowMinorGridlines>false</XShowMinorGridlines>
+          <ShowInterlaceStrips>false</ShowInterlaceStrips>
+          <XInterlaceColor>16777215</XInterlaceColor>
+          <XShowSideMargin>true</XShowSideMargin>
+          <XAxisFont>Microsoft Sans Serif,8.25,Regular</XAxisFont>
+          <AutoAxis>true</AutoAxis>
+          <AxisMax>100</AxisMax>
+          <AxisMin>0</AxisMin>
+          <YAxisVisible>True</YAxisVisible>
+          <YShowMajorGridlines>true</YShowMajorGridlines>
+          <YShowMinorGridlines>false</YShowMinorGridlines>
+          <YShowInterlaceStrips>false</YShowInterlaceStrips>
+          <YShowSideMargin>true</YShowSideMargin>
+          <YAxisFont>Microsoft Sans Serif,8.25,Regular</YAxisFont>
+          <BackgroundColor1>-1</BackgroundColor1>
+          <BackgroundColor2>-1</BackgroundColor2>
+          <GradientType>None</GradientType>
+          <Series />
+        </Presentation>
+        <Target />
+      </View>
+      <View ID="MPCHM.UPS.APC.View.IncomeVolt" Accessibility="Public" Enabled="true" Target="MPCHM.UPS.APC" TypeID="SC!Microsoft.SystemCenter.PerformanceViewType" Visible="true">
+        <Category>Operations</Category>
+        <Criteria>
+          <RuleList>
+            <Rule>$MPElement[Name="MPCHM.UPS.APC.Rule.IncomeVolt"]$</Rule>
+          </RuleList>
+        </Criteria>
+        <Presentation>
+          <SortedColumnIndex>0</SortedColumnIndex>
+          <SortOrder>0</SortOrder>
+          <StartTime>2013-08-05T15:05:58.7109891-04:00</StartTime>
+          <EndTime>2013-08-06T15:05:58.7109891-04:00</EndTime>
+          <DynamicTimeTicks>864000000000</DynamicTimeTicks>
+          <IsDynamic>true</IsDynamic>
+          <Is3DMode>false</Is3DMode>
+          <ShowAlerts>false</ShowAlerts>
+          <ShowMaintenanceMode>false</ShowMaintenanceMode>
+          <BaselineMode>false</BaselineMode>
+          <ShowPointLabels>false</ShowPointLabels>
+          <EnableSmartLabels>true</EnableSmartLabels>
+          <RightAngleAxes>false</RightAngleAxes>
+          <ClusterSeries>false</ClusterSeries>
+          <Title />
+          <TitleFont>Microsoft Sans Serif,12,Regular</TitleFont>
+          <ChartFont>Microsoft Sans Serif,8.25,Regular</ChartFont>
+          <ShowBands>false</ShowBands>
+          <BandColor>-1579033</BandColor>
+          <ChartType>Line</ChartType>
+          <Depth>100</Depth>
+          <GapDepth>100</GapDepth>
+          <Perspective>10</Perspective>
+          <GraphXRotation>0</GraphXRotation>
+          <GraphYRotation>0</GraphYRotation>
+          <XLabelAngle>0</XLabelAngle>
+          <LabelColor>-16777216</LabelColor>
+          <LabelFont>Microsoft Sans Serif,8.25,Regular</LabelFont>
+          <XAxisVisible>True</XAxisVisible>
+          <XShowMajorGridlines>false</XShowMajorGridlines>
+          <XShowMinorGridlines>false</XShowMinorGridlines>
+          <ShowInterlaceStrips>false</ShowInterlaceStrips>
+          <XInterlaceColor>16777215</XInterlaceColor>
+          <XShowSideMargin>true</XShowSideMargin>
+          <XAxisFont>Microsoft Sans Serif,8.25,Regular</XAxisFont>
+          <AutoAxis>true</AutoAxis>
+          <AxisMax>100</AxisMax>
+          <AxisMin>0</AxisMin>
+          <YAxisVisible>True</YAxisVisible>
+          <YShowMajorGridlines>true</YShowMajorGridlines>
+          <YShowMinorGridlines>false</YShowMinorGridlines>
+          <YShowInterlaceStrips>false</YShowInterlaceStrips>
+          <YShowSideMargin>true</YShowSideMargin>
+          <YAxisFont>Microsoft Sans Serif,8.25,Regular</YAxisFont>
+          <BackgroundColor1>-1</BackgroundColor1>
+          <BackgroundColor2>-1</BackgroundColor2>
+          <GradientType>None</GradientType>
+          <Series />
+        </Presentation>
+        <Target />
+      </View>
+      <View ID="MPCHM.UPS.APC.View.BatteryTime" Accessibility="Public" Enabled="true" Target="MPCHM.UPS.APC" TypeID="SC!Microsoft.SystemCenter.PerformanceViewType" Visible="true">
+        <Category>Operations</Category>
+        <Criteria>
+          <RuleList>
+            <Rule>$MPElement[Name="MPCHM.UPS.APC.Rule.BatteryTime"]$</Rule>
+          </RuleList>
+        </Criteria>
+        <Presentation>
+          <SortedColumnIndex>0</SortedColumnIndex>
+          <SortOrder>0</SortOrder>
+          <StartTime>2013-08-05T15:22:10.1861269-04:00</StartTime>
+          <EndTime>2013-08-06T15:22:10.1861269-04:00</EndTime>
+          <DynamicTimeTicks>864000000000</DynamicTimeTicks>
+          <IsDynamic>true</IsDynamic>
+          <Is3DMode>false</Is3DMode>
+          <ShowAlerts>false</ShowAlerts>
+          <ShowMaintenanceMode>false</ShowMaintenanceMode>
+          <BaselineMode>false</BaselineMode>
+          <ShowPointLabels>false</ShowPointLabels>
+          <EnableSmartLabels>true</EnableSmartLabels>
+          <RightAngleAxes>false</RightAngleAxes>
+          <ClusterSeries>false</ClusterSeries>
+          <Title />
+          <TitleFont>Microsoft Sans Serif,12,Regular</TitleFont>
+          <ChartFont>Microsoft Sans Serif,8.25,Regular</ChartFont>
+          <ShowBands>false</ShowBands>
+          <BandColor>-1579033</BandColor>
+          <ChartType>Line</ChartType>
+          <Depth>100</Depth>
+          <GapDepth>100</GapDepth>
+          <Perspective>10</Perspective>
+          <GraphXRotation>0</GraphXRotation>
+          <GraphYRotation>0</GraphYRotation>
+          <XLabelAngle>0</XLabelAngle>
+          <LabelColor>-16777216</LabelColor>
+          <LabelFont>Microsoft Sans Serif,8.25,Regular</LabelFont>
+          <XAxisVisible>True</XAxisVisible>
+          <XShowMajorGridlines>false</XShowMajorGridlines>
+          <XShowMinorGridlines>false</XShowMinorGridlines>
+          <ShowInterlaceStrips>false</ShowInterlaceStrips>
+          <XInterlaceColor>16777215</XInterlaceColor>
+          <XShowSideMargin>true</XShowSideMargin>
+          <XAxisFont>Microsoft Sans Serif,8.25,Regular</XAxisFont>
+          <AutoAxis>true</AutoAxis>
+          <AxisMax>100</AxisMax>
+          <AxisMin>0</AxisMin>
+          <YAxisVisible>True</YAxisVisible>
+          <YShowMajorGridlines>true</YShowMajorGridlines>
+          <YShowMinorGridlines>false</YShowMinorGridlines>
+          <YShowInterlaceStrips>false</YShowInterlaceStrips>
+          <YShowSideMargin>true</YShowSideMargin>
+          <YAxisFont>Microsoft Sans Serif,8.25,Regular</YAxisFont>
+          <BackgroundColor1>-1</BackgroundColor1>
+          <BackgroundColor2>-1</BackgroundColor2>
+          <GradientType>None</GradientType>
+          <Series />
+        </Presentation>
+        <Target />
+      </View>
+	  <View ID="MPCHM.UPS.APC.View.ParsedSNMPTraps" Accessibility="Public" Enabled="true" Target="MPCHM.UPS.APC" TypeID="SC!Microsoft.SystemCenter.EventViewType" Visible="true">
+        <Category>Operations</Category>
+        <Criteria>
+          <RuleList>	
+			<Rule>$MPElement[Name="MPCHM.UPS.APC.Rule.ParsedSnmpTraps"]$</Rule>			
+          </RuleList>
+        </Criteria>
+        <Presentation>
+          <ColumnInfo Index="0" SortIndex="-1" Width="100" Grouped="false" Sorted="false" IsSortable="true" Visible="true" SortOrder="Ascending">
+            <Name>Level</Name>
+            <Id>LevelId</Id>
+          </ColumnInfo>
+          <ColumnInfo Index="1" SortIndex="0" Width="100" Grouped="false" Sorted="true" IsSortable="true" Visible="true" SortOrder="Descending">
+            <Name>Date and Time</Name>
+            <Id>TimeGenerated</Id>
+          </ColumnInfo>
+          <ColumnInfo Index="2" SortIndex="-1" Width="100" Grouped="false" Sorted="false" IsSortable="true" Visible="true" SortOrder="Ascending">
+            <Name>Source</Name>
+            <Id>PublisherName</Id>
+          </ColumnInfo>
+          <ColumnInfo Index="3" SortIndex="-1" Width="100" Grouped="false" Sorted="false" IsSortable="true" Visible="true" SortOrder="Ascending">
+            <Name>Name</Name>
+            <Id>MonitoringObjectDisplayName</Id>
+          </ColumnInfo>
+          <ColumnInfo Index="4" SortIndex="-1" Width="100" Grouped="false" Sorted="false" IsSortable="true" Visible="false" SortOrder="Ascending">
+            <Name>User</Name>
+            <Id>User</Id>
+          </ColumnInfo>
+          <ColumnInfo Index="5" SortIndex="-1" Width="100" Grouped="false" Sorted="false" IsSortable="true" Visible="true" SortOrder="Ascending">
+            <Name>Event Number</Name>
+            <Id>Number</Id>
+          </ColumnInfo>
+          <ColumnInfo Index="6" SortIndex="-1" Width="100" Grouped="false" Sorted="false" IsSortable="true" Visible="false" SortOrder="Ascending">
+            <Name>Log Name</Name>
+            <Id>Channel</Id>
+          </ColumnInfo>
+          <ColumnInfo Index="7" SortIndex="-1" Width="100" Grouped="false" Sorted="false" IsSortable="true" Visible="false" SortOrder="Ascending">
+            <Name>Logging Computer</Name>
+            <Id>LoggingComputer</Id>
+          </ColumnInfo>
+          <ColumnInfo Index="8" SortIndex="-1" Width="100" Grouped="false" Sorted="false" IsSortable="true" Visible="false" SortOrder="Ascending">
+            <Name>Rule Name</Name>
+            <Id>RuleDisplayName</Id>
+          </ColumnInfo>
+        </Presentation>
+        <Target />
+      </View>
+   </Views>
+    <Folders>
+      <Folder ID="MPCHM.UPS.Folder" Accessibility="Public" ParentFolder="SC!Microsoft.SystemCenter.Monitoring.ViewFolder.Root" />
+    </Folders>
+    <FolderItems>
+      <FolderItem ElementID="MPCHM.UPS.APC.View.State" ID="MPCHM.UPS.APC.View.State.FolderItem" Folder="MPCHM.UPS.Folder" />
+	  <FolderItem ElementID="MPCHM.UPS.APC.ExtTempProbe.View.State" ID="MPCHM.UPS.APC.ExtTempProbe.View.State.FolderItem" Folder="MPCHM.UPS.Folder" />
+      <FolderItem ElementID="MPCHM.UPS.APC.View.BattState" ID="MPCHM.UPS.View.UPS.BatteryState.FolderItem" Folder="MPCHM.UPS.Folder" />
+      <FolderItem ElementID="MPCHM.UPS.APC.ExtTempProbe.View.ExtTempF" ID="MPCHM.UPS.ViewAdv.UPS.ExternalTempF.FolderItem" Folder="MPCHM.UPS.Folder" />
+	  <FolderItem ElementID="MPCHM.UPS.APC.View.IntTempF" ID="MPCHM.UPS.View.UPS.InternalTempF.FolderItem" Folder="MPCHM.UPS.Folder" />
+      <FolderItem ElementID="MPCHM.UPS.APC.View.LoadPerc" ID="MPCHM.UPS.View.UPS.LoadPercentage.FolderItem" Folder="MPCHM.UPS.Folder" />
+      <FolderItem ElementID="MPCHM.UPS.APC.View.IncomeVolt" ID="MPCHM.UPS.View.UPS.IncomeVoltage.FolderItem" Folder="MPCHM.UPS.Folder" />
+      <FolderItem ElementID="MPCHM.UPS.APC.View.BatteryTime" ID="MPCHM.UPS.View.UPS.BatteryTime.FolderItem" Folder="MPCHM.UPS.Folder" /> 
+	  <FolderItem ElementID="MPCHM.UPS.APC.View.ParsedSNMPTraps" ID="MPCHM.UPS.APC.View.ParsedSNMPTraps.FolderItem" Folder="MPCHM.UPS.Folder" />	  
+    </FolderItems>
+	<StringResources>
+      <StringResource ID="MPCHM.UPS.APC.ExtTempProbe.Monitor.ExtTemp.AlertMessage" />
+      <StringResource ID="MPCHM.UPS.APC.Monitor.IntTemp.AlertMessage" />
+	  <StringResource ID="MPCHM.UPS.APC.Monitor.LoadPerc.AlertMessage" />
+	  <StringResource ID="MPCHM.UPS.APC.Monitor.BatteryState.AlertMessage" />
+	  <StringResource ID="MPCHM.UPS.APC.Monitor.BatteryTimeTriple.AlertMessage" />
+	  <StringResource ID="MPCHM.UPS.APC.Monitor.IncomeVolt.AlertMessage" />	  
+    </StringResources>
+  </Presentation>  
+  <LanguagePacks>
+    <LanguagePack ID="ENU" IsDefault="true">
+      <DisplayStrings>
+		<DisplayString ElementID="MPCHM.UPS">
+          <Name>CHM - UPS Monitoring</Name>
+          <Description>Contains discoveries, rules, and views to provide additional monitoring to UPS Devices</Description>
+		</DisplayString>
+        <DisplayString ElementID="MPCHM.UPS.APC">
+          <Name>APC UPS</Name>
+        </DisplayString>
+		<DisplayString ElementID="MPCHM.UPS.APC.ExtTempProbe">
+          <Name>APC UPS With Ext Temp</Name>
+        </DisplayString>
+        <DisplayString ElementID="MPCHM.UPS.APC.View.State">
+          <Name>UPS Devices</Name>
+          <Description>Displays all ups devices discovered by this management pack with their state and properties.</Description>
+        </DisplayString>
+		<DisplayString ElementID="MPCHM.UPS.APC.ExtTempProbe.View.State">
+          <Name>UPS Environmental Probes</Name>
+          <Description>Displays all ups devices with external temperature monitoring discovered by this management pack with their state and properties.</Description>
+        </DisplayString>
+        <DisplayString ElementID="MPCHM.UPS.Folder">
+          <Name>CHM - UPS Monitoring</Name>
+        </DisplayString>
+        <DisplayString ElementID="MPCHM.UPS.APC.Rule.BatteryState">
+          <Name>UPS Battery State</Name>
+        </DisplayString>
+        <DisplayString ElementID="MPCHM.UPS.APC.View.BattState">
+          <Name>Battery State (on/off battery)</Name>
+        </DisplayString>
+        <DisplayString ElementID="MPCHM.UPS.APC.ExtTempProbe.Rule.ExtTempF">
+          <Name>UPS External Temperature (Fahrenheit)</Name>
+          <Description />
+        </DisplayString>
+		<DisplayString ElementID="MPCHM.UPS.APC.Rule.IntTempF">
+          <Name>UPS Internal Temperature (Fahrenheit)</Name>
+          <Description />
+        </DisplayString>
+        <DisplayString ElementID="MPCHM.UPS.APC.ExtTempProbe.View.ExtTempF">
+          <Name>External Probe Temp</Name>
+        </DisplayString>
+		<DisplayString ElementID="MPCHM.UPS.APC.View.IntTempF">
+          <Name>Internal Device Temp</Name>
+        </DisplayString>
+        <DisplayString ElementID="MPCHM.UPS.Discovery.APC">
+          <Name>MPCHM.UPS.Discovery.APC</Name>
+        </DisplayString>
+		<DisplayString ElementID="MPCHM.UPS.Discovery.APC.ExtTempProbe">
+          <Name>MPCHM.UPS.Discovery.APC.ExtTempProbe</Name>
+        </DisplayString>
+        <DisplayString ElementID="MPCHM.UPS.APC.Rule.LoadPerc">
+          <Name>UPS Load Percentage</Name>
+        </DisplayString>
+        <DisplayString ElementID="MPCHM.UPS.APC.View.LoadPerc">
+          <Name>Load Percentage</Name>
+        </DisplayString>
+        <DisplayString ElementID="MPCHM.UPS.APC.Rule.IncomeVolt">
+          <Name>UPS Input Voltage</Name>
+        </DisplayString>
+        <DisplayString ElementID="MPCHM.UPS.APC.View.IncomeVolt">
+          <Name>Input Voltage</Name>
+        </DisplayString>
+        <DisplayString ElementID="MPCHM.UPS.APC.Rule.IncomeVolt" SubElementID="DS">
+          <Name>Script Performance Data Provider</Name>
+        </DisplayString>
+        <DisplayString ElementID="MPCHM.UPS.APC.Rule.IncomeVolt" SubElementID="WriteToDW">
+          <Name>Performance data publisher</Name>
+        </DisplayString>
+        <DisplayString ElementID="MPCHM.UPS.APC.Rule.IncomeVolt" SubElementID="WriteToDB">
+          <Name>Performance Data Collection Write Action</Name>
+        </DisplayString>
+        <DisplayString ElementID="MPCHM.UPS.APC.Rule.LoadPerc" SubElementID="WriteToDW">
+          <Name>Performance data publisher</Name>
+        </DisplayString>
+        <DisplayString ElementID="MPCHM.UPS.APC.Rule.LoadPerc" SubElementID="DS">
+          <Name>Script Performance Data Provider</Name>
+        </DisplayString>
+        <DisplayString ElementID="MPCHM.UPS.APC.Rule.LoadPerc" SubElementID="WriteToDB">
+          <Name>Performance Data Collection Write Action</Name>
+        </DisplayString>
+        <DisplayString ElementID="MPCHM.UPS.APC.Rule.BatteryTime">
+          <Name>UPS Battery Time</Name>
+        </DisplayString>
+        <DisplayString ElementID="MPCHM.UPS.APC.View.BatteryTime">
+          <Name>Battery Runtime Left</Name>
+          <Description>Time UPS could run on battery, in minutes</Description>
+        </DisplayString>
+        <DisplayString ElementID="MPCHM.UPS.APC.ExtTempProbe.Rule.ExtTempF" SubElementID="WriteToDW">
+          <Name>Performance data publisher</Name>
+        </DisplayString>
+        <DisplayString ElementID="MPCHM.UPS.APC.ExtTempProbe.Rule.ExtTempF" SubElementID="DS">
+          <Name>Script Performance Data Provider</Name>
+        </DisplayString>
+        <DisplayString ElementID="MPCHM.UPS.APC.ExtTempProbe.Rule.ExtTempF" SubElementID="WriteToDB">
+          <Name>Performance Data Collection Write Action</Name>
+        </DisplayString>
+		<DisplayString ElementID="MPCHM.UPS.APC.Rule.IntTempF" SubElementID="WriteToDW">
+          <Name>Performance data publisher</Name>
+        </DisplayString>
+        <DisplayString ElementID="MPCHM.UPS.APC.Rule.IntTempF" SubElementID="DS">
+          <Name>Script Performance Data Provider</Name>
+        </DisplayString>
+        <DisplayString ElementID="MPCHM.UPS.APC.Rule.IntTempF" SubElementID="WriteToDB">
+          <Name>Performance Data Collection Write Action</Name>
+        </DisplayString>
+		<DisplayString ElementID="MPCHM.UPS.APC.ExtTempProbe.Monitor.ExtTemp">
+          <Name>External Temperature</Name>
+          <Description />
+        </DisplayString>
+        <DisplayString ElementID="MPCHM.UPS.APC.ExtTempProbe.Monitor.ExtTemp" SubElementID="FirstEventRaised">
+          <Name>Temperature Normal</Name>
+        </DisplayString>
+        <DisplayString ElementID="MPCHM.UPS.APC.ExtTempProbe.Monitor.ExtTemp" SubElementID="SecondEventRaised">
+          <Name>Temperature above 87</Name>
+        </DisplayString>
+        <DisplayString ElementID="MPCHM.UPS.APC.ExtTempProbe.Monitor.ExtTemp.AlertMessage">
+          <Name>External Temperature above 87 degrees F</Name>
+          <Description>Warning! The UPS named "{1}" in location "{2}" has an internal temperature of "{0}" F over the threshold
+		  This data was collected via the OID ".1.3.6.1.4.1.318.1.1.10.2.3.2.1.4.1" the value obtained from the OID is the UPS's internal temperature in Celsius multiplied by ten. 
+		  
+		  Other information about the UPS:
+		  IP = "{3}"
+		  Model = "{4}"
+		  Contact Owner = "{5}"</Description>
+        </DisplayString>
+		<DisplayString ElementID="MPCHM.UPS.APC.Monitor.IntTemp">
+          <Name>Internal Temperature</Name>
+          <Description />
+        </DisplayString>
+        <DisplayString ElementID="MPCHM.UPS.APC.Monitor.IntTemp" SubElementID="Healthy">
+          <Name>Temperature Normal</Name>
+        </DisplayString>
+		<DisplayString ElementID="MPCHM.UPS.APC.Monitor.IntTemp" SubElementID="Warning">
+          <Name>Temperature between 100-107</Name>
+        </DisplayString>
+        <DisplayString ElementID="MPCHM.UPS.APC.Monitor.IntTemp" SubElementID="Critical">
+          <Name>Temperature above 107</Name>
+        </DisplayString>
+        <DisplayString ElementID="MPCHM.UPS.APC.Monitor.IntTemp.AlertMessage">
+          <Name>Internal Temperature above 100 degrees F</Name>
+          <Description>Warning! The UPS named "{1}" in location "{2}" has an internal temperature of "{0}" F over the threshold
+		  This data was collected via the OID ".1.3.6.1.4.1.318.1.1.1.2.3.2.0" the value obtained from the OID is the UPS's internal temperature in Celsius multiplied by ten. 
+		  
+		  Other information about the UPS:
+		  IP = "{3}"
+		  Model = "{4}"
+		  Contact Owner = "{5}"</Description>
+        </DisplayString>
+		<DisplayString ElementID="MPCHM.UPS.APC.Monitor.LoadPerc">
+          <Name>Load Percentage</Name>
+          <Description />
+        </DisplayString>
+        <DisplayString ElementID="MPCHM.UPS.APC.Monitor.LoadPerc" SubElementID="Healthy">
+          <Name>Load Percentage Normal</Name>
+        </DisplayString>
+        <DisplayString ElementID="MPCHM.UPS.APC.Monitor.LoadPerc" SubElementID="Warning">
+          <Name>Load Percentage High</Name>
+        </DisplayString>
+        <DisplayString ElementID="MPCHM.UPS.APC.Monitor.LoadPerc.AlertMessage">
+          <Name>Load percentage higher than 60%</Name>
+          <Description>Warning! The UPS named "{1}" in location "{2}" has a load percentage of {0}%.
+		 
+		 Other information about the UPS:
+		  IP = "{3}"
+		  Model = "{4}"
+		  Contact Owner = "{5}"</Description>		  
+        </DisplayString>
+		<DisplayString ElementID="MPCHM.UPS.APC.Monitor.BatteryState">
+          <Name>Battery State</Name>
+          <Description />
+        </DisplayString>
+        <DisplayString ElementID="MPCHM.UPS.APC.Monitor.BatteryState" SubElementID="FirstEventRaised">
+          <Name>Battery Off</Name>
+        </DisplayString>
+        <DisplayString ElementID="MPCHM.UPS.APC.Monitor.BatteryState" SubElementID="SecondEventRaised">
+          <Name>Battery On</Name>
+        </DisplayString>
+        <DisplayString ElementID="MPCHM.UPS.APC.Monitor.BatteryState.AlertMessage">
+          <Name>Battery has turned on</Name>
+          <Description>Warning! The UPS named "{0}" in location "{1}" has turned on.
+		
+		  Other information about the UPS:
+		  IP = "{2}"
+		  Model = "{3}"
+		  Contact Owner = "{4}"</Description>		  
+        </DisplayString>
+		<DisplayString ElementID="MPCHM.UPS.APC.Monitor.IncomeVolt">
+          <Name>Incoming Voltage</Name>
+          <Description />
+        </DisplayString>
+        <DisplayString ElementID="MPCHM.UPS.APC.Monitor.IncomeVolt" SubElementID="Healthy">
+          <Name>Incoming Voltage between 117-123 Volts</Name>
+        </DisplayString>
+        <DisplayString ElementID="MPCHM.UPS.APC.Monitor.IncomeVolt" SubElementID="Warning">
+          <Name>Incoming Voltage above 123 Volts or below 117</Name>
+        </DisplayString>
+        <DisplayString ElementID="MPCHM.UPS.APC.Monitor.IncomeVolt.AlertMessage">
+          <Name>Incoming Voltage out of Range</Name>
+          <Description>Warning! The UPS named "{1}" in location "{2}" has an incoming voltage of {0} Volts.
+		 
+		 Other information about the UPS:
+		  IP = "{3}"
+		  Model = "{4}"
+		  Contact Owner = "{5}"</Description>		  
+        </DisplayString>
+		<DisplayString ElementID="MPCHM.UPS.APC.Monitor.BatteryTimeTriple">
+          <Name>Run Time Triple State</Name>
+          <Description />
+        </DisplayString>
+        <DisplayString ElementID="MPCHM.UPS.APC.Monitor.BatteryTimeTriple" SubElementID="Healthy">
+          <Name>Runtime above 30min</Name>
+        </DisplayString>
+        <DisplayString ElementID="MPCHM.UPS.APC.Monitor.BatteryTimeTriple" SubElementID="Critical">
+          <Name>Runtime below 15min</Name>
+        </DisplayString>
+		<DisplayString ElementID="MPCHM.UPS.APC.Monitor.BatteryTimeTriple" SubElementID="Warning">
+          <Name>Runtime between 15-30min</Name>
+        </DisplayString>
+        <DisplayString ElementID="MPCHM.UPS.APC.Monitor.BatteryTimeTriple.AlertMessage">
+          <Name>Runtime on UPS low</Name>
+          <Description>Warning! The UPS named "{1}" in location "{2}" has runtime of {0} minutes.
+		  
+		  Other information about the UPS:
+		  IP = "{3}"
+		  Model = "{4}"
+		  Contact Owner = "{5}"</Description>				  
+        </DisplayString>
+		<DisplayString ElementID="MPCHM.UPS.APC.View.ParsedSNMPTraps">
+          <Name>Parsed SNMP Traps</Name>
+        </DisplayString>
+		<DisplayString ElementID="MPCHM.UPS.APC.Rule.ParsedSnmpTraps">
+          <Name>APC UPS SNMP Event Traps with Descriptions</Name>
+        </DisplayString>
+        <DisplayString ElementID="MPCHM.UPS.APC.Rule.ParsedSnmpTraps" SubElementID="WriteToDW">
+          <Name>Event data publisher</Name>
+        </DisplayString>
+        <DisplayString ElementID="MPCHM.UPS.APC.Rule.ParsedSnmpTraps" SubElementID="WriteToDB">
+          <Name>Event Data Collection Write Action</Name>
+        </DisplayString>
+      </DisplayStrings>
+    </LanguagePack>
+  </LanguagePacks>
+</ManagementPack>
